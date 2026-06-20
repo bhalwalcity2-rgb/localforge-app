@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabaseClient() {
@@ -28,7 +29,7 @@ export async function addClient(formData: FormData) {
 
   if (!supabase) {
     console.error("Supabase environment variables are missing or invalid.");
-    return;
+    redirect("/?client_error=supabase_env");
   }
 
   try {
@@ -41,12 +42,13 @@ export async function addClient(formData: FormData) {
 
     if (error) {
       console.error(error.message);
-      return;
+      redirect(`/?client_error=${encodeURIComponent(error.message)}`);
     }
   } catch (error) {
     console.error(error);
-    return;
+    redirect("/?client_error=save_failed");
   }
 
   revalidatePath("/");
+  redirect("/?client_saved=1");
 }

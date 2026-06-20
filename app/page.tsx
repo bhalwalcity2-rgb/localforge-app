@@ -107,7 +107,12 @@ function StatusBadge({ children }: { children: string }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams
+}: {
+  searchParams?: Promise<{ client_saved?: string; client_error?: string }>;
+}) {
+  const params = await searchParams;
   const clients = await getClients();
   const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
@@ -222,6 +227,12 @@ export default async function Home() {
               <div className="panelHead">
                 <h2>Add Client</h2>
               </div>
+              {params?.client_saved ? (
+                <div className="formNotice success">Client saved. It should now appear in the clients table.</div>
+              ) : null}
+              {params?.client_error ? (
+                <div className="formNotice error">Client was not saved. Error: {params.client_error}</div>
+              ) : null}
               <form className="clientForm" action={addClient}>
                 <label>
                   Client name

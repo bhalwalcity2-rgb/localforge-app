@@ -405,6 +405,24 @@ th {
   padding: 0 18px 18px;
 }
 
+.formNotice {
+  margin: 0 18px 14px;
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.formNotice.success {
+  background: var(--mint);
+  color: var(--teal-dark);
+}
+
+.formNotice.error {
+  background: #f6dfd3;
+  color: #8a3e21;
+}
+
 .clientForm label {
   color: var(--note);
   display: grid;
