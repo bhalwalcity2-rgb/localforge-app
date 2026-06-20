@@ -8,7 +8,7 @@ function getSupabaseClient() {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
   if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("http")) {
-    throw new Error("Supabase environment variables are missing.");
+    return null;
   }
 
   return createClient(supabaseUrl, supabaseKey);
@@ -26,15 +26,26 @@ export async function addClient(formData: FormData) {
 
   const supabase = getSupabaseClient();
 
-  const { error } = await supabase.from("clients").insert({
-    name,
-    email: email || null,
-    phone: phone || null,
-    notes: notes || null
-  });
+  if (!supabase) {
+    console.error("Supabase environment variables are missing or invalid.");
+    return;
+  }
 
-  if (error) {
-    throw new Error(error.message);
+  try {
+    const { error } = await supabase.from("clients").insert({
+      name,
+      email: email || null,
+      phone: phone || null,
+      notes: notes || null
+    });
+
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+    return;
   }
 
   revalidatePath("/");

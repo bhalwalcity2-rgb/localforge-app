@@ -16,6 +16,8 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import { addClient } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 type Client = {
   id: string;
   name: string;
