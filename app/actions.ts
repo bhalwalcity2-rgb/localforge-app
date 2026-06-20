@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
   if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("http")) {
     throw new Error("Supabase environment variables are missing.");

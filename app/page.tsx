@@ -33,25 +33,30 @@ type Metric = {
 };
 
 async function getClients(): Promise<Client[]> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
   if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("http")) {
     return [];
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const { data, error } = await supabase
-    .from("clients")
-    .select("id,name,email,phone,notes,created_at")
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await supabase
+      .from("clients")
+      .select("id,name,email,phone,notes,created_at")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(error.message);
+    if (error) {
+      console.error(error.message);
+      return [];
+    }
+
+    return data ?? [];
+  } catch (error) {
+    console.error(error);
     return [];
   }
-
-  return data ?? [];
 }
 
 const metrics: Metric[] = [
