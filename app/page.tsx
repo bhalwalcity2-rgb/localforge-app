@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
 import { BusinessForm } from "./business-form";
+import { CitationTaskForm } from "./citation-task-form";
 import { ClientForm } from "./client-form";
+import { DirectoryForm } from "./directory-form";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +50,33 @@ type Business = {
 
 type BusinessRow = Omit<Business, "client_name"> & {
   clients: { name: string } | { name: string }[] | null;
+};
+
+type Directory = {
+  id: string;
+  name: string;
+  type: string | null;
+  country: string | null;
+  is_paid: boolean;
+  login_required: boolean;
+  verification_type: string | null;
+  priority_score: number;
+  submission_url: string | null;
+};
+
+type CitationTask = {
+  id: string;
+  status: string;
+  listing_url: string | null;
+  verification_notes: string | null;
+  business_name: string | null;
+  directory_name: string | null;
+  verification_type: string | null;
+};
+
+type CitationTaskRow = Omit<CitationTask, "business_name" | "directory_name" | "verification_type"> & {
+  businesses: { name: string } | { name: string }[] | null;
+  directories: { name: string; verification_type: string | null } | { name: string; verification_type: string | null }[] | null;
 };
 
 async function getClients(): Promise<Client[]> {
@@ -109,26 +138,68 @@ async function getBusinesses(): Promise<Business[]> {
   }
 }
 
-const metrics: Metric[] = [
-  { label: "Clients", value: "12", note: "+2 this month" },
-  { label: "Live citations", value: "418", note: "86% completion" },
-  { label: "Pending verification", value: "37", note: "Needs review", tone: "warning" },
-  { label: "Average NAP score", value: "82%", note: "+9 improvement" }
-];
+async function getDirectories(): Promise<Directory[]> {
+  const supabase = getSupabaseClient();
 
-const tasks = [
-  ["Summit Dental Studio", "Yelp", "Pending Verification", "Amina"],
-  ["Oakline Plumbing", "Apple Maps", "Needs Fix", "Hamza"],
-  ["Riverview Legal", "BBB", "Not Started", "Unassigned"],
-  ["Northside Fitness", "Bing Places", "Live", "Amina"]
-];
+  if (!supabase) {
+    return [];
+  }
 
-const directories = [
-  ["Google Business Profile", "Core", "Free", "Phone/Video", "98"],
-  ["Bing Places", "Core", "Free", "Email", "91"],
-  ["Yelp", "General", "Free", "Manual", "84"],
-  ["Healthgrades", "Niche", "Free", "Manual", "79"]
-];
+  try {
+    const { data, error } = await supabase
+      .from("directories")
+      .select("id,name,type,country,is_paid,login_required,verification_type,priority_score,submission_url")
+      .order("priority_score", { ascending: false });
+
+    if (error) {
+      console.error(error.message);
+      return [];
+    }
+
+    return data ?? [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+async function getCitationTasks(): Promise<CitationTask[]> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("citation_tasks")
+      .select("id,status,listing_url,verification_notes,businesses(name),directories(name,verification_type)")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error.message);
+      return [];
+    }
+
+    return ((data ?? []) as CitationTaskRow[]).map((task) => {
+      const business = Array.isArray(task.businesses) ? task.businesses[0] : task.businesses;
+      const directory = Array.isArray(task.directories) ? task.directories[0] : task.directories;
+
+      return {
+        id: task.id,
+        status: task.status,
+        listing_url: task.listing_url,
+        verification_notes: task.verification_notes,
+        business_name: business?.name ?? null,
+        directory_name: directory?.name ?? null,
+        verification_type: directory?.verification_type ?? null
+      };
+    });
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
 
 const navItems = [
   ["Dashboard", LayoutDashboard],
@@ -143,7 +214,7 @@ const navItems = [
 ] as const;
 
 function StatusBadge({ children }: { children: string }) {
-  const label = children.toLowerCase();
+  const label = children.toLowerCase().replaceAll("_", " ");
   const tone = label.includes("live")
     ? "live"
     : label.includes("pending")
@@ -152,7 +223,7 @@ function StatusBadge({ children }: { children: string }) {
         ? "fix"
         : "draft";
 
-  return <span className={`badge ${tone}`}>{children}</span>;
+  return <span className={`badge ${tone}`}>{label.replace(/\b\w/g, (letter) => letter.toUpperCase())}</span>;
 }
 
 export default async function Home({
@@ -163,10 +234,15 @@ export default async function Home({
   await searchParams;
   const clients = await getClients();
   const businesses = await getBusinesses();
+  const directories = await getDirectories();
+  const citationTasks = await getCitationTasks();
+  const liveCitationCount = citationTasks.filter((task) => task.status === "live").length;
+  const pendingTaskCount = citationTasks.filter((task) => task.status.includes("pending")).length;
   const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
     { label: "Businesses", value: String(businesses.length), note: businesses.length ? "Master NAP profiles" : "Add business NAP" },
-    ...metrics.slice(1)
+    { label: "Citation tasks", value: String(citationTasks.length), note: liveCitationCount ? `${liveCitationCount} live citations` : "Create first task" },
+    { label: "Pending review", value: String(pendingTaskCount), note: pendingTaskCount ? "Needs verification" : "No pending tasks", tone: pendingTaskCount ? "warning" : undefined }
   ];
 
   return (
@@ -333,11 +409,65 @@ export default async function Home({
             </article>
           </section>
 
-          <section className="splitGrid">
+          <section className="directoryGrid" id="directories">
             <article className="panel">
               <div className="panelHead">
-                <h2>Work Queue</h2>
-                <button className="secondaryButton">View All</button>
+                <h2>Directory Database</h2>
+                <span className="badge pending">{directories.length} Sources</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Directory</th>
+                    <th>Type</th>
+                    <th>Country</th>
+                    <th>Cost</th>
+                    <th>Verification</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {directories.length ? (
+                    directories.map((directory) => (
+                      <tr key={directory.id}>
+                        <td>
+                          <strong>{directory.name}</strong>
+                          <span className="tableSubtext">{directory.submission_url || "No submission URL yet"}</span>
+                        </td>
+                        <td>{directory.type || "-"}</td>
+                        <td>{directory.country || "-"}</td>
+                        <td>{directory.is_paid ? "Paid" : "Free"}</td>
+                        <td>{directory.verification_type || "-"}</td>
+                        <td><span className="badge pending">{String(directory.priority_score)}</span></td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="emptyState">
+                          <strong>No directories yet</strong>
+                          <span>Add citation sources manually. Later we will add suggested/imported lists.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </article>
+
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Add Directory</h2>
+              </div>
+              <DirectoryForm />
+            </article>
+          </section>
+
+          <section className="taskGrid" id="citation-tasks">
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Citation Tasks</h2>
+                <span className="badge live">Tracked Workflow</span>
               </div>
               <table>
                 <thead>
@@ -345,97 +475,43 @@ export default async function Home({
                     <th>Business</th>
                     <th>Directory</th>
                     <th>Status</th>
-                    <th>Owner</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map(([business, directory, status, owner]) => (
-                    <tr key={`${business}-${directory}`}>
-                      <td>{business}</td>
-                      <td>{directory}</td>
-                      <td>
-                        <StatusBadge>{status}</StatusBadge>
-                      </td>
-                      <td>{owner}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </article>
-
-            <article className="panel">
-              <div className="panelHead">
-                <h2>NAP Health</h2>
-              </div>
-              <div className="panelBody">
-                <div className="scoreRing">
-                  <span>82%</span>
-                </div>
-                <p className="centerText">Most issues are address formatting and missing suite numbers.</p>
-                <button className="primaryButton fullWidth">Open NAP Checker</button>
-              </div>
-            </article>
-          </section>
-
-          <section className="splitGrid lowerGrid">
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Directory Opportunities</h2>
-                <button className="secondaryButton">Add Directory</button>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Directory</th>
-                    <th>Type</th>
-                    <th>Cost</th>
                     <th>Verification</th>
-                    <th>Priority</th>
+                    <th>Listing URL</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {directories.map(([name, type, cost, verification, priority]) => (
-                    <tr key={name}>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{cost}</td>
-                      <td>{verification}</td>
-                      <td>
-                        <StatusBadge>{priority}</StatusBadge>
+                  {citationTasks.length ? (
+                    citationTasks.map((task) => (
+                      <tr key={task.id}>
+                        <td>{task.business_name || "-"}</td>
+                        <td>{task.directory_name || "-"}</td>
+                        <td><StatusBadge>{task.status}</StatusBadge></td>
+                        <td>{task.verification_type || "-"}</td>
+                        <td>{task.listing_url || "-"}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5}>
+                        <div className="emptyState">
+                          <strong>No citation tasks yet</strong>
+                          <span>Create tasks to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </article>
 
             <article className="panel">
               <div className="panelHead">
-                <h2>Submission Assistant</h2>
+                <h2>Create Citation Task</h2>
               </div>
-              <div className="panelBody stack">
-                <div className="copyRow">
-                  <div>
-                    <strong>Business Name</strong>
-                    <span>Summit Dental Studio</span>
-                  </div>
-                  <button className="secondaryButton">Copy</button>
-                </div>
-                <div className="copyRow">
-                  <div>
-                    <strong>Address</strong>
-                    <span>418 Market Street, Suite 210, Austin, TX 78701</span>
-                  </div>
-                  <button className="secondaryButton">Copy</button>
-                </div>
-                <div className="copyRow">
-                  <div>
-                    <strong>Verification</strong>
-                    <span>Human step required for captcha, OTP, or final approval.</span>
-                  </div>
-                  <StatusBadge>Pending</StatusBadge>
-                </div>
-              </div>
+              <CitationTaskForm
+                businesses={businesses.map((business) => ({ id: business.id, name: business.name }))}
+                directories={directories.map((directory) => ({ id: directory.id, name: directory.name }))}
+              />
             </article>
           </section>
         </div>
