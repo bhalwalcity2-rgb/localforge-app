@@ -32,6 +32,8 @@ export async function addClient(formData: FormData) {
     redirect("/?client_error=supabase_env");
   }
 
+  let saveError: string | null = null;
+
   try {
     const { error } = await supabase.from("clients").insert({
       name,
@@ -42,11 +44,15 @@ export async function addClient(formData: FormData) {
 
     if (error) {
       console.error(error.message);
-      redirect(`/?client_error=${encodeURIComponent(error.message)}`);
+      saveError = error.message;
     }
   } catch (error) {
     console.error(error);
-    redirect("/?client_error=save_failed");
+    saveError = error instanceof Error ? error.message : "save_failed";
+  }
+
+  if (saveError) {
+    redirect(`/?client_error=${encodeURIComponent(saveError)}`);
   }
 
   revalidatePath("/");
