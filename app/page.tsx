@@ -25,6 +25,13 @@ type Client = {
   created_at: string;
 };
 
+type Metric = {
+  label: string;
+  value: string;
+  note: string;
+  tone?: "warning";
+};
+
 async function getClients(): Promise<Client[]> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -47,7 +54,7 @@ async function getClients(): Promise<Client[]> {
   return data ?? [];
 }
 
-const metrics = [
+const metrics: Metric[] = [
   { label: "Clients", value: "12", note: "+2 this month" },
   { label: "Live citations", value: "418", note: "86% completion" },
   { label: "Pending verification", value: "37", note: "Needs review", tone: "warning" },
@@ -95,7 +102,7 @@ function StatusBadge({ children }: { children: string }) {
 
 export default async function Home() {
   const clients = await getClients();
-  const liveMetrics = [
+  const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
     ...metrics.slice(1)
   ];
