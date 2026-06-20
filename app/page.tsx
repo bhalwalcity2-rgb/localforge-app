@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { addClient } from "./actions";
+import { normalizeSupabaseUrl } from "@/lib/supabase-url";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +36,10 @@ type Metric = {
 };
 
 async function getClients(): Promise<Client[]> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseUrl = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-  if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("http")) {
+  if (!supabaseUrl || !supabaseKey) {
     return [];
   }
 
