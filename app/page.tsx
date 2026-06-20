@@ -13,6 +13,39 @@ import {
   Users,
   Wand2
 } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+import { addClient } from "./actions";
+
+type Client = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+async function getClients(): Promise<Client[]> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return [];
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { data, error } = await supabase
+    .from("clients")
+    .select("id,name,email,phone,notes,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error.message);
+    return [];
+  }
+
+  return data ?? [];
+}
 
 const metrics = [
   { label: "Clients", value: "12", note: "+2 this month" },
@@ -60,7 +93,13 @@ function StatusBadge({ children }: { children: string }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
 
-export default function Home() {
+export default async function Home() {
+  const clients = await getClients();
+  const liveMetrics = [
+    { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
+    ...metrics.slice(1)
+  ];
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -117,13 +156,81 @@ export default function Home() {
           </section>
 
           <section className="metricGrid">
-            {metrics.map((metric) => (
+            {liveMetrics.map((metric) => (
               <article className="panel metric" key={metric.label}>
                 <span>{metric.label}</span>
                 <strong>{metric.value}</strong>
                 <small className={metric.tone === "warning" ? "warningText" : ""}>{metric.note}</small>
               </article>
             ))}
+          </section>
+
+          <section className="clientGrid">
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Clients</h2>
+                <span className="badge live">Database connected</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clients.length ? (
+                    clients.map((client) => (
+                      <tr key={client.id}>
+                        <td>{client.name}</td>
+                        <td>{client.email || "-"}</td>
+                        <td>{client.phone || "-"}</td>
+                        <td>{client.notes || "-"}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4}>
+                        <div className="emptyState">
+                          <strong>No clients yet</strong>
+                          <span>Add your first client to confirm Supabase is saving real data.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </article>
+
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Add Client</h2>
+              </div>
+              <form className="clientForm" action={addClient}>
+                <label>
+                  Client name
+                  <input name="name" required placeholder="BrightPath Agency" />
+                </label>
+                <label>
+                  Email
+                  <input name="email" type="email" placeholder="ops@example.com" />
+                </label>
+                <label>
+                  Phone
+                  <input name="phone" placeholder="(555) 012-3456" />
+                </label>
+                <label>
+                  Notes
+                  <textarea name="notes" placeholder="Primary contact, package, or onboarding note" />
+                </label>
+                <button className="primaryButton" type="submit">
+                  <Plus size={17} />
+                  Save Client
+                </button>
+              </form>
+            </article>
           </section>
 
           <section className="splitGrid">

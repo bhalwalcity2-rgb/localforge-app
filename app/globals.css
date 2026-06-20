@@ -281,6 +281,13 @@ h2 {
   margin-top: 16px;
 }
 
+.clientGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
 .lowerGrid {
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
 }
@@ -392,6 +399,50 @@ th {
   display: block;
 }
 
+.clientForm {
+  display: grid;
+  gap: 14px;
+  padding: 0 18px 18px;
+}
+
+.clientForm label {
+  color: var(--note);
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.clientForm input,
+.clientForm textarea {
+  width: 100%;
+  border: 1px solid var(--cloud);
+  background: white;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.clientForm input {
+  height: 40px;
+}
+
+.clientForm textarea {
+  min-height: 92px;
+  padding-top: 11px;
+  resize: vertical;
+}
+
+.emptyState {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+}
+
+.emptyState span {
+  color: var(--note);
+}
+
 .copyRow span {
   color: var(--note);
   font-size: 13px;
@@ -401,6 +452,7 @@ th {
 
 @media (max-width: 1100px) {
   .metricGrid,
+  .clientGrid,
   .splitGrid,
   .lowerGrid {
     grid-template-columns: 1fr 1fr;
@@ -434,6 +486,7 @@ th {
 
   .pageHead,
   .metricGrid,
+  .clientGrid,
   .splitGrid,
   .lowerGrid {
     display: grid;
