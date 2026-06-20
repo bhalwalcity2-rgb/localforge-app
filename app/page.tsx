@@ -5,13 +5,11 @@ import {
   ClipboardList,
   FileText,
   LayoutDashboard,
-  MapPin,
   Menu,
   Plus,
   Search,
   Settings,
-  Users,
-  Wand2
+  Users
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
 import { BusinessForm } from "./business-form";
@@ -204,11 +202,9 @@ async function getCitationTasks(): Promise<CitationTask[]> {
 const navItems = [
   ["Dashboard", LayoutDashboard],
   ["Clients", Users],
-  ["Businesses", Building2],
-  ["Directories", ClipboardList],
-  ["Citation Tasks", CheckSquare],
-  ["Assistant", Wand2],
-  ["NAP Checker", MapPin],
+  ["Business Info", Building2],
+  ["Citation Sources", ClipboardList],
+  ["Citation Work", CheckSquare],
   ["Reports", FileText],
   ["Settings", Settings]
 ] as const;
@@ -252,7 +248,7 @@ export default async function Home({
           <div className="brandMark">LF</div>
           <div>
             <strong>LocalForge</strong>
-            <span>Local SEO operations</span>
+            <span>Citation workspace</span>
           </div>
         </div>
 
@@ -267,7 +263,7 @@ export default async function Home({
 
         <div className="phaseCard">
           <strong>Phase 1</strong>
-          <p>Citation workflow, NAP checking, and client-ready reporting.</p>
+          <p>Add a client, save business info, choose sources, then track citation work.</p>
         </div>
       </aside>
 
@@ -278,7 +274,7 @@ export default async function Home({
           </button>
           <label className="search">
             <Search size={18} />
-            <input placeholder="Search clients, directories, listings..." />
+            <input placeholder="Search clients, businesses, citations..." />
           </label>
           <div className="topActions">
             <button className="iconButton" aria-label="Notifications">
@@ -286,7 +282,7 @@ export default async function Home({
             </button>
             <button className="primaryButton">
               <Plus size={17} />
-              Quick Add
+              New Item
             </button>
           </div>
         </header>
@@ -294,10 +290,33 @@ export default async function Home({
         <div className="content">
           <section className="pageHead">
             <div>
-              <h1>Operations Dashboard</h1>
-              <p>Track citation progress, NAP issues, and client work from one workspace.</p>
+              <h1>Citation Workspace</h1>
+              <p>A simple workflow for client setup, business info, citation sources, and citation tracking.</p>
             </div>
             <button className="primaryButton">Generate Report</button>
+          </section>
+
+          <section className="guidePanel">
+            <div>
+              <span className="stepNumber">1</span>
+              <strong>Add Client</strong>
+              <p>Start with the account or business owner.</p>
+            </div>
+            <div>
+              <span className="stepNumber">2</span>
+              <strong>Business Info</strong>
+              <p>Save the main NAP profile.</p>
+            </div>
+            <div>
+              <span className="stepNumber">3</span>
+              <strong>Citation Sources</strong>
+              <p>Add directories like Yelp or Bing.</p>
+            </div>
+            <div>
+              <span className="stepNumber">4</span>
+              <strong>Track Work</strong>
+              <p>Create tasks and update status.</p>
+            </div>
           </section>
 
           <section className="metricGrid">
@@ -314,7 +333,7 @@ export default async function Home({
             <article className="panel">
               <div className="panelHead">
                 <h2>Clients</h2>
-                <span className="badge live">Database connected</span>
+                <span className="badge live">Step 1</span>
               </div>
               <table>
                 <thead>
@@ -360,8 +379,8 @@ export default async function Home({
           <section className="businessGrid" id="businesses">
             <article className="panel">
               <div className="panelHead">
-                <h2>Business Profiles</h2>
-                <span className="badge live">Master NAP</span>
+                <h2>Business Info</h2>
+                <span className="badge live">Step 2</span>
               </div>
               <table>
                 <thead>
@@ -392,7 +411,7 @@ export default async function Home({
                       <td colSpan={5}>
                         <div className="emptyState">
                           <strong>No business profiles yet</strong>
-                          <span>Add a business to create the master NAP source for citations.</span>
+                          <span>Add the main NAP profile that citations will use.</span>
                         </div>
                       </td>
                     </tr>
@@ -403,7 +422,7 @@ export default async function Home({
 
             <article className="panel">
               <div className="panelHead">
-                <h2>Add Business</h2>
+                <h2>Add Business Info</h2>
               </div>
               <BusinessForm clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
             </article>
@@ -412,8 +431,8 @@ export default async function Home({
           <section className="directoryGrid" id="directories">
             <article className="panel">
               <div className="panelHead">
-                <h2>Directory Database</h2>
-                <span className="badge pending">{directories.length} Sources</span>
+                <h2>Citation Sources</h2>
+                <span className="badge pending">Step 3</span>
               </div>
               <table>
                 <thead>
@@ -446,7 +465,7 @@ export default async function Home({
                       <td colSpan={6}>
                         <div className="emptyState">
                           <strong>No directories yet</strong>
-                          <span>Add citation sources manually. Later we will add suggested/imported lists.</span>
+                          <span>Add citation sources manually. Later we will add suggested lists.</span>
                         </div>
                       </td>
                     </tr>
@@ -457,7 +476,7 @@ export default async function Home({
 
             <article className="panel">
               <div className="panelHead">
-                <h2>Add Directory</h2>
+                <h2>Add Source</h2>
               </div>
               <DirectoryForm />
             </article>
@@ -466,8 +485,8 @@ export default async function Home({
           <section className="taskGrid" id="citation-tasks">
             <article className="panel">
               <div className="panelHead">
-                <h2>Citation Tasks</h2>
-                <span className="badge live">Tracked Workflow</span>
+                <h2>Citation Work</h2>
+                <span className="badge live">Step 4</span>
               </div>
               <table>
                 <thead>
@@ -495,7 +514,7 @@ export default async function Home({
                       <td colSpan={5}>
                         <div className="emptyState">
                           <strong>No citation tasks yet</strong>
-                          <span>Create tasks to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
+                          <span>Create work items to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
                         </div>
                       </td>
                     </tr>
@@ -506,7 +525,7 @@ export default async function Home({
 
             <article className="panel">
               <div className="panelHead">
-                <h2>Create Citation Task</h2>
+                <h2>Create Work Item</h2>
               </div>
               <CitationTaskForm
                 businesses={businesses.map((business) => ({ id: business.id, name: business.name }))}
