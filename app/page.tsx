@@ -16,6 +16,7 @@ import { BusinessForm } from "./business-form";
 import { CitationTaskForm } from "./citation-task-form";
 import { ClientForm } from "./client-form";
 import { DirectoryForm } from "./directory-form";
+import { WorkflowTabs } from "./workflow-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -329,210 +330,287 @@ export default async function Home({
             ))}
           </section>
 
-          <section className="clientGrid">
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Clients</h2>
-                <span className="badge live">Step 1</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Client</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clients.length ? (
-                    clients.map((client) => (
-                      <tr key={client.id}>
-                        <td>{client.name}</td>
-                        <td>{client.email || "-"}</td>
-                        <td>{client.phone || "-"}</td>
-                        <td>{client.notes || "-"}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4}>
-                        <div className="emptyState">
-                          <strong>No clients yet</strong>
-                          <span>Add your first client to confirm Supabase is saving real data.</span>
+          <WorkflowTabs
+            tabs={[
+              {
+                id: "setup",
+                label: "Setup",
+                helper: "Client + business info",
+                content: (
+                  <div className="tabStack">
+                    <section className="clientGrid">
+                      <article className="panel">
+                        <div className="panelHead">
+                          <h2>Clients</h2>
+                          <span className="badge live">Step 1</span>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </article>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Client</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Notes</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {clients.length ? (
+                              clients.map((client) => (
+                                <tr key={client.id}>
+                                  <td>{client.name}</td>
+                                  <td>{client.email || "-"}</td>
+                                  <td>{client.phone || "-"}</td>
+                                  <td>{client.notes || "-"}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={4}>
+                                  <div className="emptyState">
+                                    <strong>No clients yet</strong>
+                                    <span>Add your first client to confirm Supabase is saving real data.</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </article>
 
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Add Client</h2>
-              </div>
-              <ClientForm />
-            </article>
-          </section>
-
-          <section className="businessGrid" id="businesses">
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Business Info</h2>
-                <span className="badge live">Step 2</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Business</th>
-                    <th>Client</th>
-                    <th>Category</th>
-                    <th>Phone</th>
-                    <th>Website</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {businesses.length ? (
-                    businesses.map((business) => (
-                      <tr key={business.id}>
-                        <td>
-                          <strong>{business.name}</strong>
-                          <span className="tableSubtext">{business.address}</span>
-                        </td>
-                        <td>{business.client_name || "-"}</td>
-                        <td>{business.primary_category || "-"}</td>
-                        <td>{business.phone || "-"}</td>
-                        <td>{business.website || "-"}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5}>
-                        <div className="emptyState">
-                          <strong>No business profiles yet</strong>
-                          <span>Add the main NAP profile that citations will use.</span>
+                      <article className="panel">
+                        <div className="panelHead">
+                          <h2>Add Client</h2>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </article>
+                        <ClientForm />
+                      </article>
+                    </section>
 
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Add Business Info</h2>
-              </div>
-              <BusinessForm clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
-            </article>
-          </section>
-
-          <section className="directoryGrid" id="directories">
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Citation Sources</h2>
-                <span className="badge pending">Step 3</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Directory</th>
-                    <th>Type</th>
-                    <th>Country</th>
-                    <th>Cost</th>
-                    <th>Verification</th>
-                    <th>Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {directories.length ? (
-                    directories.map((directory) => (
-                      <tr key={directory.id}>
-                        <td>
-                          <strong>{directory.name}</strong>
-                          <span className="tableSubtext">{directory.submission_url || "No submission URL yet"}</span>
-                        </td>
-                        <td>{directory.type || "-"}</td>
-                        <td>{directory.country || "-"}</td>
-                        <td>{directory.is_paid ? "Paid" : "Free"}</td>
-                        <td>{directory.verification_type || "-"}</td>
-                        <td><span className="badge pending">{String(directory.priority_score)}</span></td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6}>
-                        <div className="emptyState">
-                          <strong>No directories yet</strong>
-                          <span>Add citation sources manually. Later we will add suggested lists.</span>
+                    <section className="businessGrid" id="businesses">
+                      <article className="panel">
+                        <div className="panelHead">
+                          <h2>Business Info</h2>
+                          <span className="badge live">Step 2</span>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </article>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Business</th>
+                              <th>Client</th>
+                              <th>Category</th>
+                              <th>Phone</th>
+                              <th>Website</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {businesses.length ? (
+                              businesses.map((business) => (
+                                <tr key={business.id}>
+                                  <td>
+                                    <strong>{business.name}</strong>
+                                    <span className="tableSubtext">{business.address}</span>
+                                  </td>
+                                  <td>{business.client_name || "-"}</td>
+                                  <td>{business.primary_category || "-"}</td>
+                                  <td>{business.phone || "-"}</td>
+                                  <td>{business.website || "-"}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={5}>
+                                  <div className="emptyState">
+                                    <strong>No business profiles yet</strong>
+                                    <span>Add the main NAP profile that citations will use.</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </article>
 
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Add Source</h2>
-              </div>
-              <DirectoryForm />
-            </article>
-          </section>
-
-          <section className="taskGrid" id="citation-tasks">
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Citation Work</h2>
-                <span className="badge live">Step 4</span>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Business</th>
-                    <th>Directory</th>
-                    <th>Status</th>
-                    <th>Verification</th>
-                    <th>Listing URL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {citationTasks.length ? (
-                    citationTasks.map((task) => (
-                      <tr key={task.id}>
-                        <td>{task.business_name || "-"}</td>
-                        <td>{task.directory_name || "-"}</td>
-                        <td><StatusBadge>{task.status}</StatusBadge></td>
-                        <td>{task.verification_type || "-"}</td>
-                        <td>{task.listing_url || "-"}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5}>
-                        <div className="emptyState">
-                          <strong>No citation tasks yet</strong>
-                          <span>Create work items to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
+                      <article className="panel">
+                        <div className="panelHead">
+                          <h2>Add Business Info</h2>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </article>
+                        <BusinessForm clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
+                      </article>
+                    </section>
+                  </div>
+                )
+              },
+              {
+                id: "sources",
+                label: "Sources",
+                helper: "Citation directories",
+                content: (
+                  <section className="directoryGrid" id="directories">
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Citation Sources</h2>
+                        <span className="badge pending">Step 3</span>
+                      </div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Directory</th>
+                            <th>Type</th>
+                            <th>Country</th>
+                            <th>Cost</th>
+                            <th>Verification</th>
+                            <th>Priority</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {directories.length ? (
+                            directories.map((directory) => (
+                              <tr key={directory.id}>
+                                <td>
+                                  <strong>{directory.name}</strong>
+                                  <span className="tableSubtext">{directory.submission_url || "No submission URL yet"}</span>
+                                </td>
+                                <td>{directory.type || "-"}</td>
+                                <td>{directory.country || "-"}</td>
+                                <td>{directory.is_paid ? "Paid" : "Free"}</td>
+                                <td>{directory.verification_type || "-"}</td>
+                                <td><span className="badge pending">{String(directory.priority_score)}</span></td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={6}>
+                                <div className="emptyState">
+                                  <strong>No directories yet</strong>
+                                  <span>Add citation sources manually. Later we will add suggested lists.</span>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </article>
 
-            <article className="panel">
-              <div className="panelHead">
-                <h2>Create Work Item</h2>
-              </div>
-              <CitationTaskForm
-                businesses={businesses.map((business) => ({ id: business.id, name: business.name }))}
-                directories={directories.map((directory) => ({ id: directory.id, name: directory.name }))}
-              />
-            </article>
-          </section>
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Add Source</h2>
+                      </div>
+                      <DirectoryForm />
+                    </article>
+                  </section>
+                )
+              },
+              {
+                id: "work",
+                label: "Citation Work",
+                helper: "Create + track status",
+                content: (
+                  <section className="taskGrid" id="citation-tasks">
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Citation Work</h2>
+                        <span className="badge live">Step 4</span>
+                      </div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Business</th>
+                            <th>Directory</th>
+                            <th>Status</th>
+                            <th>Verification</th>
+                            <th>Listing URL</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {citationTasks.length ? (
+                            citationTasks.map((task) => (
+                              <tr key={task.id}>
+                                <td>{task.business_name || "-"}</td>
+                                <td>{task.directory_name || "-"}</td>
+                                <td><StatusBadge>{task.status}</StatusBadge></td>
+                                <td>{task.verification_type || "-"}</td>
+                                <td>{task.listing_url || "-"}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={5}>
+                                <div className="emptyState">
+                                  <strong>No citation tasks yet</strong>
+                                  <span>Create work items to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </article>
+
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Create Work Item</h2>
+                      </div>
+                      <CitationTaskForm
+                        businesses={businesses.map((business) => ({ id: business.id, name: business.name }))}
+                        directories={directories.map((directory) => ({ id: directory.id, name: directory.name }))}
+                      />
+                    </article>
+                  </section>
+                )
+              },
+              {
+                id: "report",
+                label: "Report",
+                helper: "Simple client summary",
+                content: (
+                  <section className="reportGrid">
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Report Summary</h2>
+                        <span className="badge live">Draft</span>
+                      </div>
+                      <div className="reportBody">
+                        <div>
+                          <span>Clients</span>
+                          <strong>{clients.length}</strong>
+                        </div>
+                        <div>
+                          <span>Businesses</span>
+                          <strong>{businesses.length}</strong>
+                        </div>
+                        <div>
+                          <span>Citation Sources</span>
+                          <strong>{directories.length}</strong>
+                        </div>
+                        <div>
+                          <span>Citation Work</span>
+                          <strong>{citationTasks.length}</strong>
+                        </div>
+                      </div>
+                    </article>
+                    <article className="panel">
+                      <div className="panelHead">
+                        <h2>Next Report Features</h2>
+                      </div>
+                      <div className="panelBody stack">
+                        <div className="copyRow">
+                          <div>
+                            <strong>Client-ready PDF</strong>
+                            <span>Export progress, live citations, pending items, and NAP issues.</span>
+                          </div>
+                        </div>
+                        <div className="copyRow">
+                          <div>
+                            <strong>CSV Export</strong>
+                            <span>Download citation tasks and source lists for operations.</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </section>
+                )
+              }
+            ]}
+          />
         </div>
       </main>
     </div>
