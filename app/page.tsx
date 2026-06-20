@@ -14,8 +14,8 @@ import {
   Wand2
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-import { addClient } from "./actions";
 import { normalizeSupabaseUrl } from "@/lib/supabase-url";
+import { ClientForm } from "./client-form";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +113,7 @@ export default async function Home({
 }: {
   searchParams?: Promise<{ client_saved?: string; client_error?: string }>;
 }) {
-  const params = await searchParams;
+  await searchParams;
   const clients = await getClients();
   const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
@@ -228,34 +228,7 @@ export default async function Home({
               <div className="panelHead">
                 <h2>Add Client</h2>
               </div>
-              {params?.client_saved ? (
-                <div className="formNotice success">Client saved. It should now appear in the clients table.</div>
-              ) : null}
-              {params?.client_error ? (
-                <div className="formNotice error">Client was not saved. Error: {params.client_error}</div>
-              ) : null}
-              <form className="clientForm" action={addClient}>
-                <label>
-                  Client name
-                  <input name="name" required placeholder="BrightPath Agency" />
-                </label>
-                <label>
-                  Email
-                  <input name="email" type="email" placeholder="ops@example.com" />
-                </label>
-                <label>
-                  Phone
-                  <input name="phone" placeholder="(555) 012-3456" />
-                </label>
-                <label>
-                  Notes
-                  <textarea name="notes" placeholder="Primary contact, package, or onboarding note" />
-                </label>
-                <button className="primaryButton" type="submit">
-                  <Plus size={17} />
-                  Save Client
-                </button>
-              </form>
+              <ClientForm />
             </article>
           </section>
 

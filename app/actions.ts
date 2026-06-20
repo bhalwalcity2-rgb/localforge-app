@@ -1,9 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { normalizeSupabaseUrl } from "@/lib/supabase-url";
+
+export type ClientFormState = {
+  ok: boolean;
+  message: string | null;
+};
 
 function getSupabaseClient() {
   const supabaseUrl = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -16,24 +20,22 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
-export async function addClient(formData: FormData) {
+export async function addClient(_previousState: ClientFormState, formData: FormData): Promise<ClientFormState> {
   const name = String(formData.get("name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
 
   if (!name) {
-    return;
+    return { ok: false, message: "Client name is required." };
   }
 
   const supabase = getSupabaseClient();
 
   if (!supabase) {
     console.error("Supabase environment variables are missing or invalid.");
-    redirect("/?client_error=supabase_env");
+    return { ok: false, message: "Supabase environment variables are missing or invalid." };
   }
-
-  let saveError: string | null = null;
 
   try {
     const { error } = await supabase.from("clients").insert({
@@ -45,17 +47,13 @@ export async function addClient(formData: FormData) {
 
     if (error) {
       console.error(error.message);
-      saveError = error.message;
+      return { ok: false, message: error.message };
     }
   } catch (error) {
     console.error(error);
-    saveError = error instanceof Error ? error.message : "save_failed";
-  }
-
-  if (saveError) {
-    redirect(`/?client_error=${encodeURIComponent(saveError)}`);
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
   }
 
   revalidatePath("/");
-  redirect("/?client_saved=1");
+  return { ok: true, message: "Client saved. Refresh the page if the table does not update immediately." };
 }
