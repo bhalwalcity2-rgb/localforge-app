@@ -26,7 +26,9 @@ body {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -288,6 +290,13 @@ h2 {
   margin-top: 16px;
 }
 
+.businessGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.45fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
 .lowerGrid {
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
 }
@@ -399,6 +408,14 @@ th {
   display: block;
 }
 
+.tableSubtext {
+  color: var(--note);
+  display: block;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 4px;
+}
+
 .clientForm {
   display: grid;
   gap: 14px;
@@ -431,6 +448,7 @@ th {
 }
 
 .clientForm input,
+.clientForm select,
 .clientForm textarea {
   width: 100%;
   border: 1px solid var(--cloud);
@@ -441,7 +459,8 @@ th {
   outline: none;
 }
 
-.clientForm input {
+.clientForm input,
+.clientForm select {
   height: 40px;
 }
 
@@ -471,6 +490,7 @@ th {
 @media (max-width: 1100px) {
   .metricGrid,
   .clientGrid,
+  .businessGrid,
   .splitGrid,
   .lowerGrid {
     grid-template-columns: 1fr 1fr;
@@ -505,6 +525,7 @@ th {
   .pageHead,
   .metricGrid,
   .clientGrid,
+  .businessGrid,
   .splitGrid,
   .lowerGrid {
     display: grid;

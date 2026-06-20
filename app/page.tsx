@@ -13,8 +13,8 @@ import {
   Users,
   Wand2
 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-import { normalizeSupabaseUrl } from "@/lib/supabase-url";
+import { getSupabaseClient } from "@/lib/supabase-server";
+import { BusinessForm } from "./business-form";
 import { ClientForm } from "./client-form";
 
 export const dynamic = "force-dynamic";
@@ -35,16 +35,29 @@ type Metric = {
   tone?: "warning";
 };
 
-async function getClients(): Promise<Client[]> {
-  const supabaseUrl = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+type Business = {
+  id: string;
+  client_id: string;
+  name: string;
+  address: string;
+  phone: string | null;
+  website: string | null;
+  primary_category: string | null;
+  client_name: string | null;
+};
 
-  if (!supabaseUrl || !supabaseKey) {
+type BusinessRow = Omit<Business, "client_name"> & {
+  clients: { name: string } | { name: string }[] | null;
+};
+
+async function getClients(): Promise<Client[]> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
     return [];
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey);
     const { data, error } = await supabase
       .from("clients")
       .select("id,name,email,phone,notes,created_at")
@@ -56,6 +69,40 @@ async function getClients(): Promise<Client[]> {
     }
 
     return data ?? [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+async function getBusinesses(): Promise<Business[]> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("id,client_id,name,address,phone,website,primary_category,clients(name)")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error.message);
+      return [];
+    }
+
+    return ((data ?? []) as BusinessRow[]).map((business) => ({
+      id: business.id,
+      client_id: business.client_id,
+      name: business.name,
+      address: business.address,
+      phone: business.phone,
+      website: business.website,
+      primary_category: business.primary_category,
+      client_name: Array.isArray(business.clients) ? business.clients[0]?.name ?? null : business.clients?.name ?? null
+    }));
   } catch (error) {
     console.error(error);
     return [];
@@ -115,8 +162,10 @@ export default async function Home({
 }) {
   await searchParams;
   const clients = await getClients();
+  const businesses = await getBusinesses();
   const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
+    { label: "Businesses", value: String(businesses.length), note: businesses.length ? "Master NAP profiles" : "Add business NAP" },
     ...metrics.slice(1)
   ];
 
@@ -229,6 +278,58 @@ export default async function Home({
                 <h2>Add Client</h2>
               </div>
               <ClientForm />
+            </article>
+          </section>
+
+          <section className="businessGrid" id="businesses">
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Business Profiles</h2>
+                <span className="badge live">Master NAP</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Business</th>
+                    <th>Client</th>
+                    <th>Category</th>
+                    <th>Phone</th>
+                    <th>Website</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {businesses.length ? (
+                    businesses.map((business) => (
+                      <tr key={business.id}>
+                        <td>
+                          <strong>{business.name}</strong>
+                          <span className="tableSubtext">{business.address}</span>
+                        </td>
+                        <td>{business.client_name || "-"}</td>
+                        <td>{business.primary_category || "-"}</td>
+                        <td>{business.phone || "-"}</td>
+                        <td>{business.website || "-"}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5}>
+                        <div className="emptyState">
+                          <strong>No business profiles yet</strong>
+                          <span>Add a business to create the master NAP source for citations.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </article>
+
+            <article className="panel">
+              <div className="panelHead">
+                <h2>Add Business</h2>
+              </div>
+              <BusinessForm clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
             </article>
           </section>
 
