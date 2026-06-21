@@ -4,11 +4,15 @@ import {
   CheckSquare,
   ClipboardList,
   FileText,
+  Globe2,
   LayoutDashboard,
   Menu,
   Plus,
+  RadioTower,
   Search,
   Settings,
+  Share2,
+  Star,
   Users
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
@@ -200,15 +204,63 @@ async function getCitationTasks(): Promise<CitationTask[]> {
   }
 }
 
-const navItems = [
-  ["Dashboard", LayoutDashboard],
-  ["Clients", Users],
-  ["Business Info", Building2],
-  ["Citation Sources", ClipboardList],
-  ["Citation Work", CheckSquare],
-  ["Reports", FileText],
-  ["Settings", Settings]
+const navGroups = [
+  {
+    label: "Workspace",
+    items: [
+      ["Command Center", LayoutDashboard, "active"],
+      ["Clients", Users, ""],
+      ["Reports", FileText, ""]
+    ]
+  },
+  {
+    label: "Local SEO Modules",
+    items: [
+      ["Citations", ClipboardList, "active"],
+      ["GBP Audit", Globe2, "planned"],
+      ["Rank Tracking", RadioTower, "planned"],
+      ["Reviews", Star, "planned"],
+      ["Social & Backlinks", Share2, "planned"]
+    ]
+  },
+  {
+    label: "System",
+    items: [["Settings", Settings, ""]]
+  }
 ] as const;
+
+const platformModules = [
+  {
+    title: "Citations",
+    status: "Active",
+    description: "Build sources, create citation work, and track live or pending listings."
+  },
+  {
+    title: "GBP Audit",
+    status: "Planned",
+    description: "Audit Google Business Profile categories, services, photos, posts, and issues."
+  },
+  {
+    title: "Rank Tracking",
+    status: "Planned",
+    description: "Track local map rankings by keyword, city, and business location."
+  },
+  {
+    title: "Reviews",
+    status: "Planned",
+    description: "Monitor review health, response work, and client-facing reputation summaries."
+  },
+  {
+    title: "Social & Backlinks",
+    status: "Planned",
+    description: "Track social profiles, local links, backlinks, and authority opportunities."
+  },
+  {
+    title: "Reports",
+    status: "Planned",
+    description: "Combine citations, GBP, rankings, reviews, and links into client-ready reports."
+  }
+];
 
 function StatusBadge({ children }: { children: string }) {
   const label = children.toLowerCase().replaceAll("_", " ");
@@ -249,22 +301,28 @@ export default async function Home({
           <div className="brandMark">LF</div>
           <div>
             <strong>LocalForge</strong>
-            <span>Citation workspace</span>
+            <span>Local SEO OS</span>
           </div>
         </div>
 
         <nav className="nav">
-          {navItems.map(([label, Icon], index) => (
-            <a className={index === 0 ? "active" : ""} href={`#${label.toLowerCase().replaceAll(" ", "-")}`} key={label}>
-              <Icon size={18} />
-              {label}
-            </a>
+          {navGroups.map((group) => (
+            <div className="navGroup" key={group.label}>
+              <span>{group.label}</span>
+              {group.items.map(([label, Icon, state]) => (
+                <a className={state === "active" ? "active" : ""} href={`#${label.toLowerCase().replaceAll(" ", "-")}`} key={label}>
+                  <Icon size={18} />
+                  {label}
+                  {state === "planned" ? <small>Later</small> : null}
+                </a>
+              ))}
+            </div>
           ))}
         </nav>
 
         <div className="phaseCard">
-          <strong>Phase 1</strong>
-          <p>Add a client, save business info, choose sources, then track citation work.</p>
+          <strong>Active Module</strong>
+          <p>Citations are live first. GBP, rankings, reviews, social, backlinks, and reports are planned modules.</p>
         </div>
       </aside>
 
@@ -275,7 +333,7 @@ export default async function Home({
           </button>
           <label className="search">
             <Search size={18} />
-            <input placeholder="Search clients, businesses, citations..." />
+            <input placeholder="Search clients, locations, modules..." />
           </label>
           <div className="topActions">
             <button className="iconButton" aria-label="Notifications">
@@ -283,7 +341,7 @@ export default async function Home({
             </button>
             <button className="primaryButton">
               <Plus size={17} />
-              New Item
+              New Work
             </button>
           </div>
         </header>
@@ -291,10 +349,22 @@ export default async function Home({
         <div className="content">
           <section className="pageHead">
             <div>
-              <h1>Citation Workspace</h1>
-              <p>A simple workflow for client setup, business info, citation sources, and citation tracking.</p>
+              <h1>Command Center</h1>
+              <p>Manage Local SEO modules from one workspace. Citations are active now; GBP, rankings, reviews, backlinks, and reports are staged next.</p>
             </div>
             <button className="primaryButton">Generate Report</button>
+          </section>
+
+          <section className="moduleGrid">
+            {platformModules.map((module) => (
+              <article className="moduleCard" key={module.title}>
+                <div>
+                  <strong>{module.title}</strong>
+                  <span className={module.status === "Active" ? "moduleStatus active" : "moduleStatus"}>{module.status}</span>
+                </div>
+                <p>{module.description}</p>
+              </article>
+            ))}
           </section>
 
           <section className="guidePanel">
