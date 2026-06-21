@@ -117,7 +117,7 @@ export default async function LocationManagerPage({
             All Locations
           </Link>
           <h1>Location Manager</h1>
-          <p>Manage this specific location's NAP, sync, citations, images, and future modules.</p>
+          <p>Manage this specific location NAP, sync, citations, images, and future modules.</p>
         </div>
         <span className="badge live">Location Ready</span>
       </section>
