@@ -5,15 +5,13 @@ import {
   ClipboardList,
   FileText,
   Globe2,
-  LayoutDashboard,
   Menu,
   Plus,
   RadioTower,
   Search,
   Settings,
   Share2,
-  Star,
-  Users
+  Star
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
 import { AddLocationPanel } from "./add-location-panel";
@@ -210,15 +208,14 @@ const navGroups = [
   {
     label: "Workspace",
     items: [
-      ["Command Center", LayoutDashboard, "active"],
-      ["Client Accounts", Users, ""],
+      ["All Locations", Building2, "active"],
+      ["Citation Builder", ClipboardList, ""],
       ["Reports", FileText, ""]
     ]
   },
   {
     label: "Local SEO Modules",
     items: [
-      ["Citations", ClipboardList, "active"],
       ["GBP Audit", Globe2, "planned"],
       ["Rank Tracking", RadioTower, "planned"],
       ["Reviews", Star, "planned"],
@@ -230,39 +227,6 @@ const navGroups = [
     items: [["Settings", Settings, ""]]
   }
 ] as const;
-
-const platformModules = [
-  {
-    title: "Citations",
-    status: "Active",
-    description: "Build sources, create citation work, and track live or pending listings."
-  },
-  {
-    title: "GBP Audit",
-    status: "Planned",
-    description: "Audit Google Business Profile categories, services, photos, posts, and issues."
-  },
-  {
-    title: "Rank Tracking",
-    status: "Planned",
-    description: "Track local map rankings by keyword, city, and business location."
-  },
-  {
-    title: "Reviews",
-    status: "Planned",
-    description: "Monitor review health, response work, and client-facing reputation summaries."
-  },
-  {
-    title: "Social & Backlinks",
-    status: "Planned",
-    description: "Track social profiles, local links, backlinks, and authority opportunities."
-  },
-  {
-    title: "Reports",
-    status: "Planned",
-    description: "Combine citations, GBP, rankings, reviews, and links into client-ready reports."
-  }
-];
 
 function StatusBadge({ children }: { children: string }) {
   const label = children.toLowerCase().replaceAll("_", " ");
@@ -327,8 +291,8 @@ export default async function Home({
         </nav>
 
         <div className="phaseCard">
-          <strong>Active Module</strong>
-          <p>Citations are live first. GBP, rankings, reviews, social, backlinks, and reports are planned modules.</p>
+          <strong>Workflow</strong>
+          <p>Start from All Locations. Each location will connect citations, GBP, rankings, reviews, and reports.</p>
         </div>
       </aside>
 
@@ -353,47 +317,15 @@ export default async function Home({
         </header>
 
         <div className="content">
-          <section className="pageHead">
+          <section className="pageHead" id="all-locations">
             <div>
-              <h1>Command Center</h1>
-              <p>Manage Local SEO modules from one workspace. Citations are active now; GBP, rankings, reviews, backlinks, and reports are staged next.</p>
+              <h1>All Locations</h1>
+              <p>Manage every business location from one place. Add manually now; GBP import will auto-fill location data after Google access is connected.</p>
             </div>
-            <button className="primaryButton">Generate Report</button>
-          </section>
-
-          <section className="moduleGrid">
-            {platformModules.map((module) => (
-              <article className="moduleCard" key={module.title}>
-                <div>
-                  <strong>{module.title}</strong>
-                  <span className={module.status === "Active" ? "moduleStatus active" : "moduleStatus"}>{module.status}</span>
-                </div>
-                <p>{module.description}</p>
-              </article>
-            ))}
-          </section>
-
-          <section className="guidePanel">
-            <div>
-              <span className="stepNumber">1</span>
-              <strong>Client Account</strong>
-              <p>Create the global account and connect GBP access.</p>
-            </div>
-            <div>
-              <span className="stepNumber">2</span>
-              <strong>Import Location</strong>
-              <p>Pull GBP data automatically or add it manually.</p>
-            </div>
-            <div>
-              <span className="stepNumber">3</span>
-              <strong>Citation Sources</strong>
-              <p>Add directories like Yelp or Bing.</p>
-            </div>
-            <div>
-              <span className="stepNumber">4</span>
-              <strong>Track Work</strong>
-              <p>Create tasks and update status.</p>
-            </div>
+            <a className="primaryButton" href="#businesses">
+              <Plus size={17} />
+              Add New Location
+            </a>
           </section>
 
           <section className="metricGrid">
