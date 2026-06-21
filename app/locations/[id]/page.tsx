@@ -146,14 +146,18 @@ export default async function LocationManagerPage({
 
             <section className="managerSection">
               <div className="managerSectionHead">
-                <h3>Core Info</h3>
-                <span>Main business data</span>
+                <h3>Core Information</h3>
+                <span>General settings and business details</span>
               </div>
               <div className="infoGrid">
                 <div><span>Client</span><strong>{business.client_name || "-"}</strong></div>
+                <div><span>Unique Location Reference</span><strong>{business.name.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 14) || business.id.slice(0, 8)}</strong></div>
+                <div><span>Location Name</span><strong>{business.name}</strong></div>
+                <div><span>Address</span><strong>{business.address || "-"}</strong></div>
                 <div><span>Category</span><strong>{business.primary_category || "-"}</strong></div>
                 <div><span>Phone</span><strong>{business.phone || "-"}</strong></div>
                 <div><span>Website</span><strong>{business.website || "-"}</strong></div>
+                <div><span>Service Area Business</span><strong>No</strong></div>
               </div>
             </section>
 
@@ -175,30 +179,94 @@ export default async function LocationManagerPage({
               </div>
             </section>
 
-            <section className="managerSection splitManager">
-              <div>
-                <div className="managerSectionHead">
-                  <h3>Opening Hours</h3>
-                  <span>Preview</span>
-                </div>
-                <div className="hoursPreview">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
-                    <div key={day}><span>{day}</span><strong>09:00 - 17:00</strong></div>
-                  ))}
-                  <div><span>Sat</span><strong>Closed</strong></div>
-                  <div><span>Sun</span><strong>Closed</strong></div>
-                </div>
+            <section className="managerSection">
+              <div className="managerSectionHead">
+                <h3>Opening Hours</h3>
+                <span>Regular hours</span>
               </div>
-              <div>
-                <div className="managerSectionHead">
-                  <h3>Images</h3>
-                  <span>Logo + primary photos</span>
+              <div className="hoursGrid">
+                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+                  <div key={day} className="hoursRow">
+                    <strong>{day}</strong>
+                    <span>Open</span>
+                    <time>09:00</time>
+                    <em>to</em>
+                    <time>17:00</time>
+                  </div>
+                ))}
+                {["Saturday", "Sunday"].map((day) => (
+                  <div key={day} className="hoursRow">
+                    <strong>{day}</strong>
+                    <span>Closed</span>
+                    <time>-</time>
+                    <em>to</em>
+                    <time>-</time>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="managerSection">
+              <div className="managerSectionHead">
+                <h3>Image Management</h3>
+                <span>Logo and primary photos</span>
+              </div>
+              <div className="imageManager">
+                <div className="uploadDropzone">
+                  <strong>Drag files here</strong>
+                  <span>or browse when uploads are enabled</span>
                 </div>
                 <div className="imageSlots">
                   {["Logo", "Primary 1", "Primary 2", "Primary 3"].map((slot) => (
                     <div key={slot}>{slot}</div>
                   ))}
                 </div>
+              </div>
+            </section>
+
+            <section className="managerSection">
+              <div className="managerSectionHead">
+                <h3>About the Business</h3>
+                <span>Description used for citations</span>
+              </div>
+              <div className="descriptionBox">
+                <p>{business.short_description || "No business description saved yet."}</p>
+                <span>750 characters remaining</span>
+              </div>
+            </section>
+
+            <section className="managerSection">
+              <div className="managerSectionHead">
+                <h3>Citation Builder Data</h3>
+                <span>Extra directory listing data</span>
+              </div>
+              <div className="citationDataGrid">
+                <div><span>Contact first name</span><strong>Not supplied</strong></div>
+                <div><span>Contact last name</span><strong>Not supplied</strong></div>
+                <div><span>Contact email</span><strong>Not supplied</strong></div>
+                <div><span>Mobile phone</span><strong>{business.phone || "Not supplied"}</strong></div>
+              </div>
+              <div className="pillList">
+                <span>Cash</span>
+                <span>Visa</span>
+                <span>Mastercard</span>
+                <span>Invoice</span>
+                <span>PayPal</span>
+              </div>
+            </section>
+
+            <section className="managerSection">
+              <div className="managerSectionHead">
+                <h3>Social Profile Links</h3>
+                <span>Profiles for authority signals</span>
+              </div>
+              <div className="socialLinkGrid">
+                {["Facebook", "LinkedIn", "X", "Instagram", "Pinterest", "YouTube", "TikTok"].map((network) => (
+                  <div key={network}>
+                    <span>{network}</span>
+                    <strong>https://{network.toLowerCase()}.com</strong>
+                  </div>
+                ))}
               </div>
             </section>
           </div>
