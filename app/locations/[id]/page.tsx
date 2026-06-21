@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
+import { LocationCoreInfo } from "../../location-core-info";
 
 export const dynamic = "force-dynamic";
 
@@ -144,22 +145,7 @@ export default async function LocationManagerPage({
               </div>
             </section>
 
-            <section className="managerSection">
-              <div className="managerSectionHead">
-                <h3>Core Information</h3>
-                <span>General settings and business details</span>
-              </div>
-              <div className="infoGrid">
-                <div><span>Client</span><strong>{business.client_name || "-"}</strong></div>
-                <div><span>Unique Location Reference</span><strong>{business.name.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 14) || business.id.slice(0, 8)}</strong></div>
-                <div><span>Location Name</span><strong>{business.name}</strong></div>
-                <div><span>Address</span><strong>{business.address || "-"}</strong></div>
-                <div><span>Category</span><strong>{business.primary_category || "-"}</strong></div>
-                <div><span>Phone</span><strong>{business.phone || "-"}</strong></div>
-                <div><span>Website</span><strong>{business.website || "-"}</strong></div>
-                <div><span>Service Area Business</span><strong>No</strong></div>
-              </div>
-            </section>
+            <LocationCoreInfo business={business} />
 
             <section className="managerSection">
               <div className="managerSectionHead">

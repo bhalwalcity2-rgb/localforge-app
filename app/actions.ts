@@ -11,6 +11,7 @@ export type ClientFormState = {
 export type BusinessFormState = ClientFormState;
 export type DirectoryFormState = ClientFormState;
 export type CitationTaskFormState = ClientFormState;
+export type CoreInfoFormState = ClientFormState;
 
 export async function addClient(_previousState: ClientFormState, formData: FormData): Promise<ClientFormState> {
   const name = String(formData.get("name") || "").trim();
@@ -97,6 +98,55 @@ export async function addBusiness(_previousState: BusinessFormState, formData: F
 
   revalidatePath("/");
   return { ok: true, message: "Business profile saved. Refresh the page if it does not appear immediately." };
+}
+
+export async function updateBusinessCoreInfo(
+  _previousState: CoreInfoFormState,
+  formData: FormData
+): Promise<CoreInfoFormState> {
+  const id = String(formData.get("id") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const address = String(formData.get("address") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const website = String(formData.get("website") || "").trim();
+  const primaryCategory = String(formData.get("primary_category") || "").trim();
+
+  if (!id) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  if (!name || !address) {
+    return { ok: false, message: "Location name and address are required." };
+  }
+
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return { ok: false, message: "Supabase environment variables are missing or invalid." };
+  }
+
+  try {
+    const { error } = await supabase
+      .from("businesses")
+      .update({
+        name,
+        address,
+        phone: phone || null,
+        website: website || null,
+        primary_category: primaryCategory || null
+      })
+      .eq("id", id);
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/locations/${id}`);
+  return { ok: true, message: "Core information saved." };
 }
 
 export async function addDirectory(_previousState: DirectoryFormState, formData: FormData): Promise<DirectoryFormState> {

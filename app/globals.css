@@ -777,6 +777,12 @@ h2 {
   margin-bottom: 14px;
 }
 
+.sectionActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
 .managerSectionHead h3 {
   font-size: 17px;
   margin: 0;
@@ -813,6 +819,48 @@ h2 {
 .infoGrid strong {
   font-size: 13px;
   overflow-wrap: anywhere;
+}
+
+.inlineNotice {
+  margin: 12px 0;
+}
+
+.coreEditForm {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.coreEditForm label {
+  color: var(--note);
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.coreEditForm input,
+.coreEditForm textarea {
+  background: white;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  color: var(--ink);
+  padding: 0 12px;
+  width: 100%;
+}
+
+.coreEditForm input {
+  height: 40px;
+}
+
+.coreEditForm textarea {
+  min-height: 84px;
+  padding-top: 11px;
+  resize: vertical;
+}
+
+.coreEditForm button {
+  align-self: end;
 }
 
 .connectionList {
@@ -1394,7 +1442,8 @@ th {
   .lowerGrid,
   .imageManager,
   .citationDataGrid,
-  .socialLinkGrid {
+  .socialLinkGrid,
+  .coreEditForm {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -1439,7 +1488,8 @@ th {
   .lowerGrid,
   .imageManager,
   .citationDataGrid,
-  .socialLinkGrid {
+  .socialLinkGrid,
+  .coreEditForm {
     display: grid;
     grid-template-columns: 1fr;
   }
