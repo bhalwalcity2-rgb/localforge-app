@@ -1,7 +1,6 @@
 import {
   Bell,
   Building2,
-  CheckSquare,
   ClipboardList,
   FileText,
   Globe2,
@@ -15,9 +14,7 @@ import {
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
 import { AddLocationPanel } from "./add-location-panel";
-import { CitationTaskForm } from "./citation-task-form";
 import { ClientForm } from "./client-form";
-import { DirectoryForm } from "./directory-form";
 import { WorkflowTabs } from "./workflow-tabs";
 
 export const dynamic = "force-dynamic";
@@ -29,13 +26,6 @@ type Client = {
   phone: string | null;
   notes: string | null;
   created_at: string;
-};
-
-type Metric = {
-  label: string;
-  value: string;
-  note: string;
-  tone?: "warning";
 };
 
 type Business = {
@@ -52,18 +42,6 @@ type Business = {
 
 type BusinessRow = Omit<Business, "client_name"> & {
   clients: { name: string } | { name: string }[] | null;
-};
-
-type Directory = {
-  id: string;
-  name: string;
-  type: string | null;
-  country: string | null;
-  is_paid: boolean;
-  login_required: boolean;
-  verification_type: string | null;
-  priority_score: number;
-  submission_url: string | null;
 };
 
 type CitationTask = {
@@ -135,31 +113,6 @@ async function getBusinesses(): Promise<Business[]> {
       short_description: business.short_description,
       client_name: Array.isArray(business.clients) ? business.clients[0]?.name ?? null : business.clients?.name ?? null
     }));
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-async function getDirectories(): Promise<Directory[]> {
-  const supabase = getSupabaseClient();
-
-  if (!supabase) {
-    return [];
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("directories")
-      .select("id,name,type,country,is_paid,login_required,verification_type,priority_score,submission_url")
-      .order("priority_score", { ascending: false });
-
-    if (error) {
-      console.error(error.message);
-      return [];
-    }
-
-    return data ?? [];
   } catch (error) {
     console.error(error);
     return [];
@@ -249,20 +202,12 @@ export default async function Home({
   await searchParams;
   const clients = await getClients();
   const businesses = await getBusinesses();
-  const directories = await getDirectories();
   const citationTasks = await getCitationTasks();
-  const liveCitationCount = citationTasks.filter((task) => task.status === "live").length;
   const pendingTaskCount = citationTasks.filter((task) => task.status.includes("pending")).length;
   const selectedBusiness = businesses[0] ?? null;
   const businessCitationTasks = selectedBusiness
     ? citationTasks.filter((task) => task.business_name === selectedBusiness.name)
     : [];
-  const liveMetrics: Metric[] = [
-    { label: "Client accounts", value: String(clients.length), note: clients.length ? "Global accounts" : "Add first account" },
-    { label: "Locations", value: String(businesses.length), note: businesses.length ? "Business NAP profiles" : "Add or import NAP" },
-    { label: "Citation tasks", value: String(citationTasks.length), note: liveCitationCount ? `${liveCitationCount} live citations` : "Create first task" },
-    { label: "Pending review", value: String(pendingTaskCount), note: pendingTaskCount ? "Needs verification" : "No pending tasks", tone: pendingTaskCount ? "warning" : undefined }
-  ];
 
   return (
     <div className="shell">
@@ -309,10 +254,10 @@ export default async function Home({
             <button className="iconButton" aria-label="Notifications">
               <Bell size={18} />
             </button>
-            <button className="primaryButton">
+            <a className="primaryButton" href="#add-location">
               <Plus size={17} />
-              New Work
-            </button>
+              Add Location
+            </a>
           </div>
         </header>
 
@@ -322,91 +267,109 @@ export default async function Home({
               <h1>All Locations</h1>
               <p>Manage every business location from one place. Add manually now; GBP import will auto-fill location data after Google access is connected.</p>
             </div>
-            <a className="primaryButton" href="#businesses">
-              <Plus size={17} />
-              Add New Location
-            </a>
-          </section>
-
-          <section className="metricGrid">
-            {liveMetrics.map((metric) => (
-              <article className="panel metric" key={metric.label}>
-                <span>{metric.label}</span>
-                <strong>{metric.value}</strong>
-                <small className={metric.tone === "warning" ? "warningText" : ""}>{metric.note}</small>
-              </article>
-            ))}
+            <div className="pageActions">
+              <button className="secondaryButton" type="button">Download Location Data</button>
+              <a className="primaryButton" href="#add-location">
+                <Plus size={17} />
+                Add Location(s)
+              </a>
+            </div>
           </section>
 
           <WorkflowTabs
             tabs={[
               {
-                id: "setup",
-                label: "Setup",
-                helper: "Account + GBP import",
+                id: "locations",
+                label: "Locations",
+                helper: `${businesses.length} saved`,
                 content: (
                   <div className="tabStack">
-                    <section className="clientGrid">
-                      <article className="panel">
-                        <div className="panelHead">
-                          <div>
-                            <h2>Client Accounts</h2>
-                            <p className="sectionHint">Global workspace records for owners, agencies, or brands.</p>
-                          </div>
-                          <span className="badge live">Step 1</span>
+                    <article className="panel locationsTablePanel">
+                      <div className="locationsToolbar">
+                        <div className="locationsSearch">
+                          <input placeholder="Name, City, Zip or Reference" />
+                          <button className="iconButton" type="button" aria-label="Search locations">
+                            <Search size={17} />
+                          </button>
                         </div>
+                        <button className="secondaryButton filterButton" type="button">Filter by Client</button>
+                        <span className="resultCount">Showing {businesses.length ? `1-${businesses.length} of ${businesses.length}` : "0"} results</span>
+                      </div>
+                      <div className="tableScroll">
                         <table>
                           <thead>
                             <tr>
-                              <th>Account</th>
-                              <th>Email</th>
-                              <th>Phone</th>
-                              <th>Notes</th>
+                              <th>Location</th>
+                              <th>Ref. Number</th>
+                              <th>City, Zipcode</th>
+                              <th>Client Name</th>
+                              <th>Active Sync Alerts</th>
+                              <th>Connections</th>
+                              <th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {clients.length ? (
-                              clients.map((client) => (
-                                <tr key={client.id}>
-                                  <td>{client.name}</td>
-                                  <td>{client.email || "-"}</td>
-                                  <td>{client.phone || "-"}</td>
-                                  <td>{client.notes || "-"}</td>
-                                </tr>
-                              ))
+                            {businesses.length ? (
+                              businesses.map((business, index) => {
+                                const locationTasks = citationTasks.filter((task) => task.business_name === business.name);
+                                const pendingAlerts = locationTasks.filter((task) => task.status !== "live").length;
+                                const cityZip = business.address?.split(",").slice(-2).join(",").trim() || "-";
+                                const refNumber = business.name.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 12) || `LOC${index + 1}`;
+
+                                return (
+                                  <tr key={business.id}>
+                                    <td>
+                                      <div className="locationNameCell">
+                                        <span className="favoriteStar">*</span>
+                                        <div>
+                                          <strong>{business.name}</strong>
+                                          <span>{business.address || "Address missing"}</span>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td>{refNumber}</td>
+                                    <td>{cityZip}</td>
+                                    <td>{business.client_name || "-"}</td>
+                                    <td>
+                                      {pendingAlerts ? (
+                                        <span className="alertNumber">{pendingAlerts}</span>
+                                      ) : (
+                                        <button className="syncButton" type="button">Get Active Sync</button>
+                                      )}
+                                    </td>
+                                    <td><span className="gbpIcon" title="Google Business Profile">G</span></td>
+                                    <td>
+                                      <div className="rowActions">
+                                        <a className="managerButton" href="#location-manager">Location Manager</a>
+                                        <button className="roundMenu" type="button" aria-label="More location actions">v</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })
                             ) : (
                               <tr>
-                                <td colSpan={4}>
+                                <td colSpan={7}>
                                   <div className="emptyState">
-                                    <strong>No client accounts yet</strong>
-                                    <span>Add the global account first. GBP connection will attach to this level.</span>
+                                    <strong>No locations yet</strong>
+                                    <span>Add a business location manually now. GBP import will come after Google access is connected.</span>
                                   </div>
                                 </td>
                               </tr>
                             )}
                           </tbody>
                         </table>
-                      </article>
+                      </div>
+                    </article>
 
-                      <article className="panel">
-                        <div className="panelHead">
-                          <div>
-                            <h2>Add Client Account</h2>
-                            <p className="sectionHint">This is the global record used across all modules.</p>
-                          </div>
-                        </div>
-                        <ClientForm />
-                      </article>
-                    </section>
-
-                    <section className="locationManager" id="businesses">
+                    <section className="locationManager" id="location-manager">
                       <article className="panel locationPanel">
                         <div className="panelHead">
                           <div>
                             <h2>Location Manager</h2>
-                            <p className="sectionHint">Manage business locations and NAP profiles imported from GBP or entered manually.</p>
+                            <p className="sectionHint">Open a location from the table, then manage NAP, sync, citations, images, and future modules.</p>
                           </div>
-                          <span className="badge live">{selectedBusiness ? "Location Ready" : "Step 2"}</span>
+                          <span className="badge live">{selectedBusiness ? "Location Ready" : "No Location"}</span>
                         </div>
                         {selectedBusiness ? (
                           <div className="locationBody">
@@ -489,91 +452,61 @@ export default async function Home({
                                   </div>
                                 </div>
                               </section>
-
-                              <section className="managerSection splitManager">
-                                <div>
-                                  <div className="managerSectionHead">
-                                    <h3>Citation Details</h3>
-                                    <span>Extra listing data</span>
-                                  </div>
-                                  <div className="pillList">
-                                    <span>Contact person</span>
-                                    <span>Services/products</span>
-                                    <span>Payment methods</span>
-                                    <span>Extra categories</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="managerSectionHead">
-                                    <h3>Social Links</h3>
-                                    <span>Profiles for authority signals</span>
-                                  </div>
-                                  <div className="pillList">
-                                    <span>Facebook</span>
-                                    <span>LinkedIn</span>
-                                    <span>Instagram</span>
-                                    <span>YouTube</span>
-                                  </div>
-                                </div>
-                              </section>
                             </div>
                           </div>
                         ) : (
                           <div className="emptyState padded">
-                            <strong>No business profiles yet</strong>
-                            <span>Add the main NAP profile that citations will use.</span>
+                            <strong>No locations yet</strong>
+                            <span>Add a location to unlock Location Manager.</span>
                           </div>
                         )}
                       </article>
 
-                      <AddLocationPanel clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
+                      <div id="add-location">
+                        <AddLocationPanel clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
+                      </div>
                     </section>
                   </div>
                 )
               },
               {
-                id: "sources",
-                label: "Sources",
-                helper: "Citation directories",
+                id: "clients",
+                label: "Clients",
+                helper: `${clients.length} accounts`,
                 content: (
-                  <section className="directoryGrid" id="directories">
+                  <section className="clientGrid">
                     <article className="panel">
                       <div className="panelHead">
-                        <h2>Citation Sources</h2>
-                        <span className="badge pending">Step 3</span>
+                        <div>
+                          <h2>Clients</h2>
+                          <p className="sectionHint">Client records used for filtering and ownership.</p>
+                        </div>
                       </div>
                       <table>
                         <thead>
                           <tr>
-                            <th>Directory</th>
-                            <th>Type</th>
-                            <th>Country</th>
-                            <th>Cost</th>
-                            <th>Verification</th>
-                            <th>Priority</th>
+                            <th>Client</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Notes</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {directories.length ? (
-                            directories.map((directory) => (
-                              <tr key={directory.id}>
-                                <td>
-                                  <strong>{directory.name}</strong>
-                                  <span className="tableSubtext">{directory.submission_url || "No submission URL yet"}</span>
-                                </td>
-                                <td>{directory.type || "-"}</td>
-                                <td>{directory.country || "-"}</td>
-                                <td>{directory.is_paid ? "Paid" : "Free"}</td>
-                                <td>{directory.verification_type || "-"}</td>
-                                <td><span className="badge pending">{String(directory.priority_score)}</span></td>
+                          {clients.length ? (
+                            clients.map((client) => (
+                              <tr key={client.id}>
+                                <td>{client.name}</td>
+                                <td>{client.email || "-"}</td>
+                                <td>{client.phone || "-"}</td>
+                                <td>{client.notes || "-"}</td>
                               </tr>
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={6}>
+                              <td colSpan={4}>
                                 <div className="emptyState">
-                                  <strong>No directories yet</strong>
-                                  <span>Add citation sources manually. Later we will add suggested lists.</span>
+                                  <strong>No clients yet</strong>
+                                  <span>Add a client when you need to group multiple locations.</span>
                                 </div>
                               </td>
                             </tr>
@@ -584,121 +517,58 @@ export default async function Home({
 
                     <article className="panel">
                       <div className="panelHead">
-                        <h2>Add Source</h2>
+                        <h2>Add Client</h2>
                       </div>
-                      <DirectoryForm />
+                      <ClientForm />
                     </article>
                   </section>
                 )
               },
               {
-                id: "work",
-                label: "Citation Work",
-                helper: "Create + track status",
+                id: "alerts",
+                label: "Alert Inbox",
+                helper: String(pendingTaskCount),
                 content: (
-                  <section className="taskGrid" id="citation-tasks">
-                    <article className="panel">
-                      <div className="panelHead">
-                        <h2>Citation Work</h2>
-                        <span className="badge live">Step 4</span>
+                  <article className="panel">
+                    <div className="panelHead">
+                      <div>
+                        <h2>Alert Inbox</h2>
+                        <p className="sectionHint">Active sync and citation alerts will collect here.</p>
                       </div>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Business</th>
-                            <th>Directory</th>
-                            <th>Status</th>
-                            <th>Verification</th>
-                            <th>Listing URL</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {citationTasks.length ? (
-                            citationTasks.map((task) => (
-                              <tr key={task.id}>
-                                <td>{task.business_name || "-"}</td>
-                                <td>{task.directory_name || "-"}</td>
-                                <td><StatusBadge>{task.status}</StatusBadge></td>
-                                <td>{task.verification_type || "-"}</td>
-                                <td>{task.listing_url || "-"}</td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan={5}>
-                                <div className="emptyState">
-                                  <strong>No citation tasks yet</strong>
-                                  <span>Create work items to track submitted, pending, live, duplicate, rejected, and needs-fix citations.</span>
-                                </div>
-                              </td>
+                      <span className="badge pending">{pendingTaskCount}</span>
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Location</th>
+                          <th>Directory</th>
+                          <th>Status</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {citationTasks.filter((task) => task.status !== "live").length ? (
+                          citationTasks.filter((task) => task.status !== "live").map((task) => (
+                            <tr key={task.id}>
+                              <td>{task.business_name || "-"}</td>
+                              <td>{task.directory_name || "-"}</td>
+                              <td><StatusBadge>{task.status}</StatusBadge></td>
+                              <td>{task.verification_notes || "-"}</td>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </article>
-
-                    <article className="panel">
-                      <div className="panelHead">
-                        <h2>Create Work Item</h2>
-                      </div>
-                      <CitationTaskForm
-                        businesses={businesses.map((business) => ({ id: business.id, name: business.name }))}
-                        directories={directories.map((directory) => ({ id: directory.id, name: directory.name }))}
-                      />
-                    </article>
-                  </section>
-                )
-              },
-              {
-                id: "report",
-                label: "Report",
-                helper: "Simple client summary",
-                content: (
-                  <section className="reportGrid">
-                    <article className="panel">
-                      <div className="panelHead">
-                        <h2>Report Summary</h2>
-                        <span className="badge live">Draft</span>
-                      </div>
-                      <div className="reportBody">
-                        <div>
-                          <span>Clients</span>
-                          <strong>{clients.length}</strong>
-                        </div>
-                        <div>
-                          <span>Businesses</span>
-                          <strong>{businesses.length}</strong>
-                        </div>
-                        <div>
-                          <span>Citation Sources</span>
-                          <strong>{directories.length}</strong>
-                        </div>
-                        <div>
-                          <span>Citation Work</span>
-                          <strong>{citationTasks.length}</strong>
-                        </div>
-                      </div>
-                    </article>
-                    <article className="panel">
-                      <div className="panelHead">
-                        <h2>Next Report Features</h2>
-                      </div>
-                      <div className="panelBody stack">
-                        <div className="copyRow">
-                          <div>
-                            <strong>Client-ready PDF</strong>
-                            <span>Export progress, live citations, pending items, and NAP issues.</span>
-                          </div>
-                        </div>
-                        <div className="copyRow">
-                          <div>
-                            <strong>CSV Export</strong>
-                            <span>Download citation tasks and source lists for operations.</span>
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  </section>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4}>
+                              <div className="emptyState">
+                                <strong>No alerts yet</strong>
+                                <span>Pending sync, NAP, duplicate, and citation issues will appear here.</span>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </article>
                 )
               }
             ]}

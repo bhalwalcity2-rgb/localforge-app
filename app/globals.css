@@ -206,6 +206,7 @@ main {
   background: var(--teal);
   color: white;
   border-color: var(--teal);
+  text-decoration: none;
 }
 
 .primaryButton:hover {
@@ -258,6 +259,14 @@ h2 {
   color: var(--note);
   margin-top: 7px;
   line-height: 1.5;
+}
+
+.pageActions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .metricGrid {
@@ -340,7 +349,7 @@ h2 {
   border-radius: 8px;
   box-shadow: var(--shadow);
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 6px;
 }
 
@@ -381,6 +390,148 @@ h2 {
 .tabStack {
   display: grid;
   gap: 16px;
+}
+
+.locationsTablePanel {
+  overflow: hidden;
+}
+
+.locationsToolbar {
+  align-items: center;
+  background: #fbfcf8;
+  border-bottom: 1px solid var(--cloud);
+  display: flex;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.locationsSearch {
+  align-items: center;
+  display: flex;
+  min-width: 280px;
+}
+
+.locationsSearch input {
+  border: 1px solid var(--teal-dark);
+  border-radius: 6px 0 0 6px;
+  color: var(--ink);
+  height: 38px;
+  padding: 0 12px;
+  width: 240px;
+}
+
+.locationsSearch .iconButton {
+  border-color: var(--teal-dark);
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
+  height: 38px;
+  min-height: 38px;
+  width: 40px;
+}
+
+.filterButton {
+  min-height: 38px;
+}
+
+.resultCount {
+  color: var(--ink);
+  font-size: 13px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.locationNameCell {
+  align-items: center;
+  display: flex;
+  gap: 9px;
+  min-width: 240px;
+}
+
+.locationNameCell strong,
+.locationNameCell span {
+  display: block;
+}
+
+.locationNameCell span {
+  color: var(--note);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.favoriteStar {
+  color: var(--note);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.syncButton {
+  background: #e2e2de;
+  border: 1px solid #9a9b95;
+  border-radius: 999px;
+  color: var(--note);
+  font-weight: 650;
+  min-height: 32px;
+  padding: 0 13px;
+}
+
+.alertNumber {
+  color: #039b3f;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.gbpIcon {
+  align-items: center;
+  background: #4f7dea;
+  border-radius: 5px;
+  color: white;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 22px;
+  justify-content: center;
+  width: 22px;
+}
+
+.rowActions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 170px;
+}
+
+.managerButton {
+  align-items: center;
+  background: #69e08d;
+  border: 1px solid #058d34;
+  border-radius: 999px;
+  color: #062d16;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 650;
+  min-height: 34px;
+  padding: 0 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.roundMenu {
+  align-items: center;
+  background: white;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 18px;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
 }
 
 .guidePanel div {
