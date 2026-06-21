@@ -48,6 +48,7 @@ type Business = {
   phone: string | null;
   website: string | null;
   primary_category: string | null;
+  short_description: string | null;
   client_name: string | null;
 };
 
@@ -117,7 +118,7 @@ async function getBusinesses(): Promise<Business[]> {
   try {
     const { data, error } = await supabase
       .from("businesses")
-      .select("id,client_id,name,address,phone,website,primary_category,clients(name)")
+      .select("id,client_id,name,address,phone,website,primary_category,short_description,clients(name)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -133,6 +134,7 @@ async function getBusinesses(): Promise<Business[]> {
       phone: business.phone,
       website: business.website,
       primary_category: business.primary_category,
+      short_description: business.short_description,
       client_name: Array.isArray(business.clients) ? business.clients[0]?.name ?? null : business.clients?.name ?? null
     }));
   } catch (error) {
@@ -287,6 +289,10 @@ export default async function Home({
   const citationTasks = await getCitationTasks();
   const liveCitationCount = citationTasks.filter((task) => task.status === "live").length;
   const pendingTaskCount = citationTasks.filter((task) => task.status.includes("pending")).length;
+  const selectedBusiness = businesses[0] ?? null;
+  const businessCitationTasks = selectedBusiness
+    ? citationTasks.filter((task) => task.business_name === selectedBusiness.name)
+    : [];
   const liveMetrics: Metric[] = [
     { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
     { label: "Businesses", value: String(businesses.length), note: businesses.length ? "Master NAP profiles" : "Add business NAP" },
@@ -455,48 +461,131 @@ export default async function Home({
                       </article>
                     </section>
 
-                    <section className="businessGrid" id="businesses">
-                      <article className="panel">
+                    <section className="locationManager" id="businesses">
+                      <article className="panel locationPanel">
                         <div className="panelHead">
-                          <h2>Business Info</h2>
-                          <span className="badge live">Step 2</span>
+                          <div>
+                            <h2>Location Manager</h2>
+                            <p className="sectionHint">Manage the main business profile used across citations, GBP, reports, and future modules.</p>
+                          </div>
+                          <span className="badge live">{selectedBusiness ? "Location Ready" : "Step 2"}</span>
                         </div>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Business</th>
-                              <th>Client</th>
-                              <th>Category</th>
-                              <th>Phone</th>
-                              <th>Website</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {businesses.length ? (
-                              businesses.map((business) => (
-                                <tr key={business.id}>
-                                  <td>
-                                    <strong>{business.name}</strong>
-                                    <span className="tableSubtext">{business.address}</span>
-                                  </td>
-                                  <td>{business.client_name || "-"}</td>
-                                  <td>{business.primary_category || "-"}</td>
-                                  <td>{business.phone || "-"}</td>
-                                  <td>{business.website || "-"}</td>
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={5}>
-                                  <div className="emptyState">
-                                    <strong>No business profiles yet</strong>
-                                    <span>Add the main NAP profile that citations will use.</span>
+                        {selectedBusiness ? (
+                          <div className="locationBody">
+                            <aside className="locationList" aria-label="Saved locations">
+                              {businesses.map((business, index) => (
+                                <div className={index === 0 ? "locationItem active" : "locationItem"} key={business.id}>
+                                  <strong>{business.name}</strong>
+                                  <span>{business.client_name || "No client"}</span>
+                                  <small>{business.primary_category || "Category missing"}</small>
+                                </div>
+                              ))}
+                            </aside>
+                            <div className="locationDetail">
+                              <section className="locationHero">
+                                <div>
+                                  <span className="eyebrow">Selected Location</span>
+                                  <h3>{selectedBusiness.name}</h3>
+                                  <p>{selectedBusiness.address}</p>
+                                </div>
+                                <div className="locationScore">
+                                  <strong>{businessCitationTasks.length}</strong>
+                                  <span>Citation items</span>
+                                </div>
+                              </section>
+
+                              <section className="managerSection">
+                                <div className="managerSectionHead">
+                                  <h3>Core Info</h3>
+                                  <span>Main business data</span>
+                                </div>
+                                <div className="infoGrid">
+                                  <div><span>Client</span><strong>{selectedBusiness.client_name || "-"}</strong></div>
+                                  <div><span>Category</span><strong>{selectedBusiness.primary_category || "-"}</strong></div>
+                                  <div><span>Phone</span><strong>{selectedBusiness.phone || "-"}</strong></div>
+                                  <div><span>Website</span><strong>{selectedBusiness.website || "-"}</strong></div>
+                                </div>
+                              </section>
+
+                              <section className="managerSection">
+                                <div className="managerSectionHead">
+                                  <h3>Connect & Sync</h3>
+                                  <span>Future module connections</span>
+                                </div>
+                                <div className="connectionList">
+                                  {["Google Business Profile", "Facebook", "Bing", "Apple Maps", "Yelp"].map((platform, index) => (
+                                    <div className="connectionRow" key={platform}>
+                                      <div>
+                                        <strong>{platform}</strong>
+                                        <span>{index === 0 ? "Ready for GBP audit and insights setup." : "Connection planned for sync and alerts."}</span>
+                                      </div>
+                                      <span className={index === 0 ? "connectionBadge ready" : "connectionBadge"}>{index === 0 ? "Ready" : "Later"}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </section>
+
+                              <section className="managerSection splitManager">
+                                <div>
+                                  <div className="managerSectionHead">
+                                    <h3>Opening Hours</h3>
+                                    <span>Preview</span>
                                   </div>
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                                  <div className="hoursPreview">
+                                    {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
+                                      <div key={day}><span>{day}</span><strong>09:00 - 17:00</strong></div>
+                                    ))}
+                                    <div><span>Sat</span><strong>Closed</strong></div>
+                                    <div><span>Sun</span><strong>Closed</strong></div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="managerSectionHead">
+                                    <h3>Images</h3>
+                                    <span>Logo + primary photos</span>
+                                  </div>
+                                  <div className="imageSlots">
+                                    {["Logo", "Primary 1", "Primary 2", "Primary 3"].map((slot) => (
+                                      <div key={slot}>{slot}</div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </section>
+
+                              <section className="managerSection splitManager">
+                                <div>
+                                  <div className="managerSectionHead">
+                                    <h3>Citation Details</h3>
+                                    <span>Extra listing data</span>
+                                  </div>
+                                  <div className="pillList">
+                                    <span>Contact person</span>
+                                    <span>Services/products</span>
+                                    <span>Payment methods</span>
+                                    <span>Extra categories</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="managerSectionHead">
+                                    <h3>Social Links</h3>
+                                    <span>Profiles for authority signals</span>
+                                  </div>
+                                  <div className="pillList">
+                                    <span>Facebook</span>
+                                    <span>LinkedIn</span>
+                                    <span>Instagram</span>
+                                    <span>YouTube</span>
+                                  </div>
+                                </div>
+                              </section>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="emptyState padded">
+                            <strong>No business profiles yet</strong>
+                            <span>Add the main NAP profile that citations will use.</span>
+                          </div>
+                        )}
                       </article>
 
                       <article className="panel">
