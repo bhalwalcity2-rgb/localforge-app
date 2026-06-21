@@ -649,6 +649,29 @@ h2 {
   min-height: 520px;
 }
 
+.singleLocationBody {
+  border-top: 0;
+}
+
+.standalonePage {
+  padding: 28px;
+}
+
+.backLink {
+  align-items: center;
+  color: var(--teal-dark);
+  display: inline-flex;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  text-decoration: none;
+}
+
+.addLocationPageGrid {
+  max-width: 520px;
+}
+
 .locationList {
   background: #fbfcf8;
   border-right: 1px solid var(--cloud);

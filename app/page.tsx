@@ -13,7 +13,6 @@ import {
   Star
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
-import { AddLocationPanel } from "./add-location-panel";
 import { ClientForm } from "./client-form";
 import { WorkflowTabs } from "./workflow-tabs";
 
@@ -204,10 +203,6 @@ export default async function Home({
   const businesses = await getBusinesses();
   const citationTasks = await getCitationTasks();
   const pendingTaskCount = citationTasks.filter((task) => task.status.includes("pending")).length;
-  const selectedBusiness = businesses[0] ?? null;
-  const businessCitationTasks = selectedBusiness
-    ? citationTasks.filter((task) => task.business_name === selectedBusiness.name)
-    : [];
 
   return (
     <div className="shell">
@@ -254,7 +249,7 @@ export default async function Home({
             <button className="iconButton" aria-label="Notifications">
               <Bell size={18} />
             </button>
-            <a className="primaryButton" href="#add-location">
+            <a className="primaryButton" href="/locations/new">
               <Plus size={17} />
               Add Location
             </a>
@@ -269,7 +264,7 @@ export default async function Home({
             </div>
             <div className="pageActions">
               <button className="secondaryButton" type="button">Download Location Data</button>
-              <a className="primaryButton" href="#add-location">
+              <a className="primaryButton" href="/locations/new">
                 <Plus size={17} />
                 Add Location(s)
               </a>
@@ -340,7 +335,7 @@ export default async function Home({
                                     <td><span className="gbpIcon" title="Google Business Profile">G</span></td>
                                     <td>
                                       <div className="rowActions">
-                                        <a className="managerButton" href="#location-manager">Location Manager</a>
+                                        <a className="managerButton" href={`/locations/${business.id}`}>Location Manager</a>
                                         <button className="roundMenu" type="button" aria-label="More location actions">v</button>
                                       </div>
                                     </td>
@@ -361,111 +356,6 @@ export default async function Home({
                         </table>
                       </div>
                     </article>
-
-                    <section className="locationManager" id="location-manager">
-                      <article className="panel locationPanel">
-                        <div className="panelHead">
-                          <div>
-                            <h2>Location Manager</h2>
-                            <p className="sectionHint">Open a location from the table, then manage NAP, sync, citations, images, and future modules.</p>
-                          </div>
-                          <span className="badge live">{selectedBusiness ? "Location Ready" : "No Location"}</span>
-                        </div>
-                        {selectedBusiness ? (
-                          <div className="locationBody">
-                            <aside className="locationList" aria-label="Saved locations">
-                              {businesses.map((business, index) => (
-                                <div className={index === 0 ? "locationItem active" : "locationItem"} key={business.id}>
-                                  <strong>{business.name}</strong>
-                                  <span>{business.client_name || "No client"}</span>
-                                  <small>{business.primary_category || "Category missing"}</small>
-                                </div>
-                              ))}
-                            </aside>
-                            <div className="locationDetail">
-                              <section className="locationHero">
-                                <div>
-                                  <span className="eyebrow">Selected Location</span>
-                                  <h3>{selectedBusiness.name}</h3>
-                                  <p>{selectedBusiness.address}</p>
-                                </div>
-                                <div className="locationScore">
-                                  <strong>{businessCitationTasks.length}</strong>
-                                  <span>Citation items</span>
-                                </div>
-                              </section>
-
-                              <section className="managerSection">
-                                <div className="managerSectionHead">
-                                  <h3>Core Info</h3>
-                                  <span>Main business data</span>
-                                </div>
-                                <div className="infoGrid">
-                                  <div><span>Client</span><strong>{selectedBusiness.client_name || "-"}</strong></div>
-                                  <div><span>Category</span><strong>{selectedBusiness.primary_category || "-"}</strong></div>
-                                  <div><span>Phone</span><strong>{selectedBusiness.phone || "-"}</strong></div>
-                                  <div><span>Website</span><strong>{selectedBusiness.website || "-"}</strong></div>
-                                </div>
-                              </section>
-
-                              <section className="managerSection">
-                                <div className="managerSectionHead">
-                                  <h3>Connect & Sync</h3>
-                                  <span>Future module connections</span>
-                                </div>
-                                <div className="connectionList">
-                                  {["Google Business Profile", "Facebook", "Bing", "Apple Maps", "Yelp"].map((platform, index) => (
-                                    <div className="connectionRow" key={platform}>
-                                      <div>
-                                        <strong>{platform}</strong>
-                                        <span>{index === 0 ? "Next: connect Google access to import location data automatically." : "Connection planned for sync and alerts."}</span>
-                                      </div>
-                                      <span className={index === 0 ? "connectionBadge ready" : "connectionBadge"}>{index === 0 ? "GBP ready" : "Later"}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </section>
-
-                              <section className="managerSection splitManager">
-                                <div>
-                                  <div className="managerSectionHead">
-                                    <h3>Opening Hours</h3>
-                                    <span>Preview</span>
-                                  </div>
-                                  <div className="hoursPreview">
-                                    {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
-                                      <div key={day}><span>{day}</span><strong>09:00 - 17:00</strong></div>
-                                    ))}
-                                    <div><span>Sat</span><strong>Closed</strong></div>
-                                    <div><span>Sun</span><strong>Closed</strong></div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="managerSectionHead">
-                                    <h3>Images</h3>
-                                    <span>Logo + primary photos</span>
-                                  </div>
-                                  <div className="imageSlots">
-                                    {["Logo", "Primary 1", "Primary 2", "Primary 3"].map((slot) => (
-                                      <div key={slot}>{slot}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </section>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="emptyState padded">
-                            <strong>No locations yet</strong>
-                            <span>Add a location to unlock Location Manager.</span>
-                          </div>
-                        )}
-                      </article>
-
-                      <div id="add-location">
-                        <AddLocationPanel clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
-                      </div>
-                    </section>
                   </div>
                 )
               },

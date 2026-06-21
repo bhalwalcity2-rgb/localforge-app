@@ -9,10 +9,11 @@ type AddLocationPanelProps = {
     id: string;
     name: string;
   }[];
+  defaultOpen?: boolean;
 };
 
-export function AddLocationPanel({ clients }: AddLocationPanelProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AddLocationPanel({ clients, defaultOpen = false }: AddLocationPanelProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   if (!isOpen) {
     return (
