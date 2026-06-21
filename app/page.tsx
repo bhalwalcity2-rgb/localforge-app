@@ -12,6 +12,7 @@ import {
   Share2,
   Star
 } from "lucide-react";
+import Link from "next/link";
 import { getSupabaseClient } from "@/lib/supabase-server";
 import { ClientForm } from "./client-form";
 import { WorkflowTabs } from "./workflow-tabs";
@@ -249,10 +250,10 @@ export default async function Home({
             <button className="iconButton" aria-label="Notifications">
               <Bell size={18} />
             </button>
-            <a className="primaryButton" href="/locations/new">
+            <Link className="primaryButton" href="/locations/new">
               <Plus size={17} />
               Add Location
-            </a>
+            </Link>
           </div>
         </header>
 
@@ -264,10 +265,10 @@ export default async function Home({
             </div>
             <div className="pageActions">
               <button className="secondaryButton" type="button">Download Location Data</button>
-              <a className="primaryButton" href="/locations/new">
+              <Link className="primaryButton" href="/locations/new">
                 <Plus size={17} />
                 Add Location(s)
-              </a>
+              </Link>
             </div>
           </section>
 
@@ -335,7 +336,7 @@ export default async function Home({
                                     <td><span className="gbpIcon" title="Google Business Profile">G</span></td>
                                     <td>
                                       <div className="rowActions">
-                                        <a className="managerButton" href={`/locations/${business.id}`}>Location Manager</a>
+                                        <Link className="managerButton" href={`/locations/${business.id}`}>Location Manager</Link>
                                         <button className="roundMenu" type="button" aria-label="More location actions">v</button>
                                       </div>
                                     </td>
