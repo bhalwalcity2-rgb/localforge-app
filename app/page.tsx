@@ -211,7 +211,7 @@ const navGroups = [
     label: "Workspace",
     items: [
       ["Command Center", LayoutDashboard, "active"],
-      ["Clients", Users, ""],
+      ["Client Accounts", Users, ""],
       ["Reports", FileText, ""]
     ]
   },
@@ -294,8 +294,8 @@ export default async function Home({
     ? citationTasks.filter((task) => task.business_name === selectedBusiness.name)
     : [];
   const liveMetrics: Metric[] = [
-    { label: "Clients", value: String(clients.length), note: clients.length ? "Loaded from Supabase" : "Add first client" },
-    { label: "Businesses", value: String(businesses.length), note: businesses.length ? "Master NAP profiles" : "Add business NAP" },
+    { label: "Client accounts", value: String(clients.length), note: clients.length ? "Global accounts" : "Add first account" },
+    { label: "Locations", value: String(businesses.length), note: businesses.length ? "Business NAP profiles" : "Add or import NAP" },
     { label: "Citation tasks", value: String(citationTasks.length), note: liveCitationCount ? `${liveCitationCount} live citations` : "Create first task" },
     { label: "Pending review", value: String(pendingTaskCount), note: pendingTaskCount ? "Needs verification" : "No pending tasks", tone: pendingTaskCount ? "warning" : undefined }
   ];
@@ -376,13 +376,13 @@ export default async function Home({
           <section className="guidePanel">
             <div>
               <span className="stepNumber">1</span>
-              <strong>Add Client</strong>
-              <p>Start with the account or business owner.</p>
+              <strong>Client Account</strong>
+              <p>Create the global account and connect GBP access.</p>
             </div>
             <div>
               <span className="stepNumber">2</span>
-              <strong>Business Info</strong>
-              <p>Save the main NAP profile.</p>
+              <strong>Import Location</strong>
+              <p>Pull GBP data automatically or add it manually.</p>
             </div>
             <div>
               <span className="stepNumber">3</span>
@@ -411,19 +411,22 @@ export default async function Home({
               {
                 id: "setup",
                 label: "Setup",
-                helper: "Client + business info",
+                helper: "Account + GBP import",
                 content: (
                   <div className="tabStack">
                     <section className="clientGrid">
                       <article className="panel">
                         <div className="panelHead">
-                          <h2>Clients</h2>
+                          <div>
+                            <h2>Client Accounts</h2>
+                            <p className="sectionHint">Global workspace records for owners, agencies, or brands.</p>
+                          </div>
                           <span className="badge live">Step 1</span>
                         </div>
                         <table>
                           <thead>
                             <tr>
-                              <th>Client</th>
+                              <th>Account</th>
                               <th>Email</th>
                               <th>Phone</th>
                               <th>Notes</th>
@@ -443,8 +446,8 @@ export default async function Home({
                               <tr>
                                 <td colSpan={4}>
                                   <div className="emptyState">
-                                    <strong>No clients yet</strong>
-                                    <span>Add your first client to confirm Supabase is saving real data.</span>
+                                    <strong>No client accounts yet</strong>
+                                    <span>Add the global account first. GBP connection will attach to this level.</span>
                                   </div>
                                 </td>
                               </tr>
@@ -455,7 +458,10 @@ export default async function Home({
 
                       <article className="panel">
                         <div className="panelHead">
-                          <h2>Add Client</h2>
+                          <div>
+                            <h2>Add Client Account</h2>
+                            <p className="sectionHint">This is the global record used across all modules.</p>
+                          </div>
                         </div>
                         <ClientForm />
                       </article>
@@ -466,7 +472,7 @@ export default async function Home({
                         <div className="panelHead">
                           <div>
                             <h2>Location Manager</h2>
-                            <p className="sectionHint">Manage the main business profile used across citations, GBP, reports, and future modules.</p>
+                            <p className="sectionHint">Manage business locations and NAP profiles imported from GBP or entered manually.</p>
                           </div>
                           <span className="badge live">{selectedBusiness ? "Location Ready" : "Step 2"}</span>
                         </div>
@@ -517,9 +523,9 @@ export default async function Home({
                                     <div className="connectionRow" key={platform}>
                                       <div>
                                         <strong>{platform}</strong>
-                                        <span>{index === 0 ? "Ready for GBP audit and insights setup." : "Connection planned for sync and alerts."}</span>
+                                        <span>{index === 0 ? "Next: connect Google access to import location data automatically." : "Connection planned for sync and alerts."}</span>
                                       </div>
-                                      <span className={index === 0 ? "connectionBadge ready" : "connectionBadge"}>{index === 0 ? "Ready" : "Later"}</span>
+                                      <span className={index === 0 ? "connectionBadge ready" : "connectionBadge"}>{index === 0 ? "GBP ready" : "Later"}</span>
                                     </div>
                                   ))}
                                 </div>

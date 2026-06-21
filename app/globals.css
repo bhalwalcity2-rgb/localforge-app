@@ -809,6 +809,75 @@ h2 {
   width: 100%;
 }
 
+.integrationHint,
+.importNotice {
+  align-items: flex-start;
+  background: #f4f8f3;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  color: var(--note);
+  display: flex;
+  gap: 10px;
+  line-height: 1.45;
+  padding: 12px;
+}
+
+.integrationHint {
+  margin-bottom: 2px;
+}
+
+.integrationHint svg,
+.importNotice svg {
+  color: var(--teal-dark);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.integrationHint strong,
+.integrationHint span {
+  display: block;
+}
+
+.integrationHint strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.integrationHint span,
+.importNotice span {
+  font-size: 12px;
+}
+
+.importNotice {
+  margin: 0 18px 16px;
+}
+
+.locationCreateOptions {
+  display: grid;
+  gap: 10px;
+}
+
+.optionButton {
+  justify-content: flex-start;
+  min-height: 42px;
+  width: 100%;
+}
+
+.optionButton span {
+  background: #eef1eb;
+  border-radius: 999px;
+  color: var(--note);
+  font-size: 11px;
+  font-weight: 800;
+  margin-left: auto;
+  padding: 4px 8px;
+}
+
+.optionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 .reportBody {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

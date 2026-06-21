@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Building2, CloudDownload, Plus, X } from "lucide-react";
 import { BusinessForm } from "./business-form";
 
 type AddLocationPanelProps = {
@@ -20,13 +20,20 @@ export function AddLocationPanel({ clients }: AddLocationPanelProps) {
         <div className="addLocationClosed">
           <div>
             <p className="eyebrow">Location setup</p>
-            <h2>Add Location</h2>
-            <p>Create a business profile only when you need another NAP record.</p>
+            <h2>Add Business Location</h2>
+            <p>Import from GBP when connected, or add the NAP profile manually.</p>
           </div>
-          <button className="primaryButton" type="button" onClick={() => setIsOpen(true)}>
-            <Plus size={17} />
-            Add Location
-          </button>
+          <div className="locationCreateOptions">
+            <button className="secondaryButton optionButton" type="button" disabled title="Google Business Profile import will be added after OAuth setup.">
+              <CloudDownload size={17} />
+              Import from GBP
+              <span>Planned</span>
+            </button>
+            <button className="primaryButton optionButton" type="button" onClick={() => setIsOpen(true)}>
+              <Building2 size={17} />
+              Add Manually
+            </button>
+          </div>
         </div>
       </article>
     );
@@ -37,13 +44,17 @@ export function AddLocationPanel({ clients }: AddLocationPanelProps) {
       <div className="panelHead">
         <div>
           <p className="eyebrow">Location setup</p>
-          <h2>Add Location</h2>
-          <p className="sectionHint">Save the master NAP profile used by citations and future modules.</p>
+          <h2>Add Business Location</h2>
+          <p className="sectionHint">Manual fallback for the NAP profile. Later this same record can be populated from GBP.</p>
         </div>
         <button className="secondaryButton compactButton" type="button" onClick={() => setIsOpen(false)}>
           <X size={16} />
           Close
         </button>
+      </div>
+      <div className="importNotice">
+        <Plus size={16} />
+        <span>GBP import will auto-fill name, address, phone, website, category, hours, photos, and profile details after Google access is connected.</span>
       </div>
       <BusinessForm clients={clients} />
     </article>

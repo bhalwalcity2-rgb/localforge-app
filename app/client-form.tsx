@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { KeyRound, Plus } from "lucide-react";
 import { useActionState } from "react";
 import { addClient, type ClientFormState } from "./actions";
 
@@ -18,9 +18,16 @@ export function ClientForm() {
         <div className={`formNotice ${state.ok ? "success" : "error"}`}>{state.message}</div>
       ) : null}
       <form className="clientForm" action={formAction}>
+        <div className="integrationHint">
+          <KeyRound size={17} />
+          <div>
+            <strong>Global account</strong>
+            <span>GBP access will connect here, then locations can be imported automatically.</span>
+          </div>
+        </div>
         <label>
-          Client name
-          <input name="name" required placeholder="BrightPath Agency" />
+          Client account name
+          <input name="name" required placeholder="ATLA1 or BrightPath Agency" />
         </label>
         <label>
           Email
@@ -36,7 +43,7 @@ export function ClientForm() {
         </label>
         <button className="primaryButton" type="submit" disabled={pending}>
           <Plus size={17} />
-          {pending ? "Saving..." : "Save Client"}
+          {pending ? "Saving..." : "Save Client Account"}
         </button>
       </form>
     </>
