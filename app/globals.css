@@ -217,6 +217,11 @@ main {
   padding: 0;
 }
 
+.compactButton {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
 .mobileOnly {
   display: none;
 }
@@ -781,6 +786,27 @@ h2 {
 
 .panelBody {
   padding: 18px;
+}
+
+.addLocationPanel {
+  align-self: start;
+}
+
+.addLocationClosed {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.addLocationClosed p:last-child {
+  color: var(--note);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+.addLocationClosed .primaryButton {
+  width: 100%;
 }
 
 .reportBody {

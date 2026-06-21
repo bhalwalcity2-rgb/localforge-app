@@ -16,7 +16,7 @@ import {
   Users
 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase-server";
-import { BusinessForm } from "./business-form";
+import { AddLocationPanel } from "./add-location-panel";
 import { CitationTaskForm } from "./citation-task-form";
 import { ClientForm } from "./client-form";
 import { DirectoryForm } from "./directory-form";
@@ -588,12 +588,7 @@ export default async function Home({
                         )}
                       </article>
 
-                      <article className="panel">
-                        <div className="panelHead">
-                          <h2>Add Business Info</h2>
-                        </div>
-                        <BusinessForm clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
-                      </article>
+                      <AddLocationPanel clients={clients.map((client) => ({ id: client.id, name: client.name }))} />
                     </section>
                   </div>
                 )
