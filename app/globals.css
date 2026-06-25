@@ -863,6 +863,65 @@ h2 {
   align-self: end;
 }
 
+.hoursEditForm,
+.citationEditForm,
+.socialEditForm,
+.imageUrlGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.hoursEditForm {
+  gap: 10px;
+}
+
+.hoursEditForm .primaryButton,
+.citationEditForm .primaryButton,
+.socialEditForm .primaryButton,
+.imageUrlGrid .primaryButton {
+  justify-self: start;
+}
+
+.hoursRow select,
+.hoursRow input,
+.citationEditForm input,
+.citationEditForm textarea,
+.socialEditForm input,
+.imageUrlGrid input {
+  background: white;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 40px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.citationEditForm,
+.socialEditForm,
+.imageUrlGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.citationEditForm label,
+.socialEditForm label,
+.imageUrlGrid label {
+  color: var(--note);
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.citationEditForm textarea {
+  min-height: 118px;
+  padding-top: 11px;
+  resize: vertical;
+}
+
+.wideField {
+  grid-column: 1 / -1;
+}
+
 .connectionList {
   display: grid;
 }
@@ -1443,7 +1502,10 @@ th {
   .imageManager,
   .citationDataGrid,
   .socialLinkGrid,
-  .coreEditForm {
+  .coreEditForm,
+  .citationEditForm,
+  .socialEditForm,
+  .imageUrlGrid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -1489,7 +1551,10 @@ th {
   .imageManager,
   .citationDataGrid,
   .socialLinkGrid,
-  .coreEditForm {
+  .coreEditForm,
+  .citationEditForm,
+  .socialEditForm,
+  .imageUrlGrid {
     display: grid;
     grid-template-columns: 1fr;
   }

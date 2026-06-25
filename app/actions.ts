@@ -12,6 +12,39 @@ export type BusinessFormState = ClientFormState;
 export type DirectoryFormState = ClientFormState;
 export type CitationTaskFormState = ClientFormState;
 export type CoreInfoFormState = ClientFormState;
+export type LocationDetailsFormState = ClientFormState;
+
+const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+async function upsertLocationDetails(
+  businessId: string,
+  values: Record<string, unknown>
+): Promise<LocationDetailsFormState> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return { ok: false, message: "Supabase environment variables are missing or invalid." };
+  }
+
+  try {
+    const { error } = await supabase
+      .from("location_details")
+      .upsert({
+        business_id: businessId,
+        ...values,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+
+  revalidatePath(`/locations/${businessId}`);
+  return { ok: true, message: "Saved." };
+}
 
 export async function addClient(_previousState: ClientFormState, formData: FormData): Promise<ClientFormState> {
   const name = String(formData.get("name") || "").trim();
@@ -147,6 +180,98 @@ export async function updateBusinessCoreInfo(
   revalidatePath("/");
   revalidatePath(`/locations/${id}`);
   return { ok: true, message: "Core information saved." };
+}
+
+export async function updateLocationHours(
+  _previousState: LocationDetailsFormState,
+  formData: FormData
+): Promise<LocationDetailsFormState> {
+  const businessId = String(formData.get("business_id") || "").trim();
+
+  if (!businessId) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  const openingHours = Object.fromEntries(
+    days.map((day) => [
+      day,
+      {
+        status: String(formData.get(`${day}_status`) || "closed"),
+        open: String(formData.get(`${day}_open`) || "").trim(),
+        close: String(formData.get(`${day}_close`) || "").trim()
+      }
+    ])
+  );
+
+  return upsertLocationDetails(businessId, { opening_hours: openingHours });
+}
+
+export async function updateLocationImages(
+  _previousState: LocationDetailsFormState,
+  formData: FormData
+): Promise<LocationDetailsFormState> {
+  const businessId = String(formData.get("business_id") || "").trim();
+
+  if (!businessId) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  const images = {
+    logo: String(formData.get("logo") || "").trim(),
+    primary_1: String(formData.get("primary_1") || "").trim(),
+    primary_2: String(formData.get("primary_2") || "").trim(),
+    primary_3: String(formData.get("primary_3") || "").trim()
+  };
+
+  return upsertLocationDetails(businessId, { images });
+}
+
+export async function updateLocationCitationData(
+  _previousState: LocationDetailsFormState,
+  formData: FormData
+): Promise<LocationDetailsFormState> {
+  const businessId = String(formData.get("business_id") || "").trim();
+
+  if (!businessId) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  const citationData = {
+    description: String(formData.get("description") || "").trim(),
+    contact_first_name: String(formData.get("contact_first_name") || "").trim(),
+    contact_last_name: String(formData.get("contact_last_name") || "").trim(),
+    contact_email: String(formData.get("contact_email") || "").trim(),
+    mobile_phone: String(formData.get("mobile_phone") || "").trim(),
+    employees: String(formData.get("employees") || "").trim(),
+    services: String(formData.get("services") || "").trim(),
+    categories: String(formData.get("categories") || "").trim(),
+    payments: formData.getAll("payments").map((value) => String(value))
+  };
+
+  return upsertLocationDetails(businessId, { citation_data: citationData });
+}
+
+export async function updateLocationSocialLinks(
+  _previousState: LocationDetailsFormState,
+  formData: FormData
+): Promise<LocationDetailsFormState> {
+  const businessId = String(formData.get("business_id") || "").trim();
+
+  if (!businessId) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  const socialLinks = {
+    facebook: String(formData.get("facebook") || "").trim(),
+    linkedin: String(formData.get("linkedin") || "").trim(),
+    x: String(formData.get("x") || "").trim(),
+    instagram: String(formData.get("instagram") || "").trim(),
+    pinterest: String(formData.get("pinterest") || "").trim(),
+    youtube: String(formData.get("youtube") || "").trim(),
+    tiktok: String(formData.get("tiktok") || "").trim()
+  };
+
+  return upsertLocationDetails(businessId, { social_links: socialLinks });
 }
 
 export async function addDirectory(_previousState: DirectoryFormState, formData: FormData): Promise<DirectoryFormState> {
