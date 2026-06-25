@@ -8,6 +8,7 @@ import {
   OpeningHoursForm,
   SocialLinksForm
 } from "../../location-detail-forms";
+import { LocationCitationBuilder } from "../../location-citation-builder";
 import { LocationCoreInfo } from "../../location-core-info";
 
 export const dynamic = "force-dynamic";
@@ -31,13 +32,30 @@ type BusinessRow = Omit<Business, "client_name"> & {
 type CitationTask = {
   id: string;
   status: string;
+  listing_url: string | null;
+  verification_notes: string | null;
+  directory_id: string | null;
+  directory_name: string | null;
+  verification_type: string | null;
   business_name: string | null;
 };
 
 type CitationTaskRow = {
   id: string;
   status: string;
+  listing_url: string | null;
+  verification_notes: string | null;
   businesses: { name: string } | { name: string }[] | null;
+  directories: { id: string; name: string; verification_type: string | null } | { id: string; name: string; verification_type: string | null }[] | null;
+};
+
+type DirectoryOption = {
+  id: string;
+  name: string;
+  type: string | null;
+  country: string | null;
+  verification_type: string | null;
+  priority_score: number;
 };
 
 type LocationDetails = {
@@ -124,7 +142,7 @@ async function getLocationTasks(businessName: string): Promise<CitationTask[]> {
 
   const { data, error } = await supabase
     .from("citation_tasks")
-    .select("id,status,businesses(name)")
+    .select("id,status,listing_url,verification_notes,businesses(name),directories(id,name,verification_type)")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -134,14 +152,39 @@ async function getLocationTasks(businessName: string): Promise<CitationTask[]> {
   return ((data ?? []) as CitationTaskRow[])
     .map((task) => {
       const business = Array.isArray(task.businesses) ? task.businesses[0] : task.businesses;
+      const directory = Array.isArray(task.directories) ? task.directories[0] : task.directories;
 
       return {
         id: task.id,
         status: task.status,
+        listing_url: task.listing_url,
+        verification_notes: task.verification_notes,
+        directory_id: directory?.id ?? null,
+        directory_name: directory?.name ?? null,
+        verification_type: directory?.verification_type ?? null,
         business_name: business?.name ?? null
       };
     })
     .filter((task) => task.business_name === businessName);
+}
+
+async function getDirectories(): Promise<DirectoryOption[]> {
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("directories")
+    .select("id,name,type,country,verification_type,priority_score")
+    .order("priority_score", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return data ?? [];
 }
 
 export default async function LocationManagerPage({
@@ -158,6 +201,7 @@ export default async function LocationManagerPage({
 
   const citationTasks = await getLocationTasks(business.name);
   const details = await getLocationDetails(business.id);
+  const directories = await getDirectories();
 
   return (
     <main className="standalonePage">
@@ -224,6 +268,7 @@ export default async function LocationManagerPage({
               fallbackPhone={business.phone}
             />
             <SocialLinksForm businessId={business.id} socialLinks={details.social_links} />
+            <LocationCitationBuilder businessId={business.id} directories={directories} tasks={citationTasks} />
           </div>
         </div>
       </section>

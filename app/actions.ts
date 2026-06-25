@@ -13,6 +13,8 @@ export type DirectoryFormState = ClientFormState;
 export type CitationTaskFormState = ClientFormState;
 export type CoreInfoFormState = ClientFormState;
 export type LocationDetailsFormState = ClientFormState;
+export type CitationCampaignFormState = ClientFormState;
+export type CitationStatusFormState = ClientFormState;
 
 const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -359,4 +361,109 @@ export async function addCitationTask(
 
   revalidatePath("/");
   return { ok: true, message: "Citation task created. Refresh the page if it does not appear immediately." };
+}
+
+export async function createCitationCampaign(
+  _previousState: CitationCampaignFormState,
+  formData: FormData
+): Promise<CitationCampaignFormState> {
+  const businessId = String(formData.get("business_id") || "").trim();
+  const directoryIds = formData.getAll("directory_ids").map((value) => String(value)).filter(Boolean);
+
+  if (!businessId) {
+    return { ok: false, message: "Location ID is missing." };
+  }
+
+  if (!directoryIds.length) {
+    return { ok: false, message: "Select at least one directory." };
+  }
+
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return { ok: false, message: "Supabase environment variables are missing or invalid." };
+  }
+
+  try {
+    const { data: existing, error: existingError } = await supabase
+      .from("citation_tasks")
+      .select("directory_id")
+      .eq("business_id", businessId)
+      .in("directory_id", directoryIds);
+
+    if (existingError) {
+      return { ok: false, message: existingError.message };
+    }
+
+    const existingDirectoryIds = new Set((existing ?? []).map((task) => task.directory_id));
+    const newDirectoryIds = directoryIds.filter((directoryId) => !existingDirectoryIds.has(directoryId));
+
+    if (!newDirectoryIds.length) {
+      return { ok: true, message: "All selected directories already have citation tasks." };
+    }
+
+    const { error } = await supabase.from("citation_tasks").insert(
+      newDirectoryIds.map((directoryId) => ({
+        business_id: businessId,
+        directory_id: directoryId,
+        status: "not_started",
+        verification_notes: "Created from Citation Builder campaign."
+      }))
+    );
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath(`/locations/${businessId}`);
+    return { ok: true, message: `${newDirectoryIds.length} citation tasks created.` };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+export async function updateCitationTaskStatus(
+  _previousState: CitationStatusFormState,
+  formData: FormData
+): Promise<CitationStatusFormState> {
+  const taskId = String(formData.get("task_id") || "").trim();
+  const businessId = String(formData.get("business_id") || "").trim();
+  const status = String(formData.get("status") || "not_started").trim();
+  const listingUrl = String(formData.get("listing_url") || "").trim();
+  const verificationNotes = String(formData.get("verification_notes") || "").trim();
+
+  if (!taskId || !businessId) {
+    return { ok: false, message: "Citation task ID is missing." };
+  }
+
+  const supabase = getSupabaseClient();
+
+  if (!supabase) {
+    return { ok: false, message: "Supabase environment variables are missing or invalid." };
+  }
+
+  try {
+    const { error } = await supabase
+      .from("citation_tasks")
+      .update({
+        status,
+        listing_url: listingUrl || null,
+        verification_notes: verificationNotes || null,
+        submitted_at: ["submitted", "pending_verification", "live"].includes(status) ? new Date().toISOString() : null,
+        live_at: status === "live" ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", taskId);
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    revalidatePath("/");
+    revalidatePath(`/locations/${businessId}`);
+    return { ok: true, message: "Citation status saved." };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
 }

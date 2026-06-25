@@ -922,6 +922,119 @@ h2 {
   grid-column: 1 / -1;
 }
 
+.citationStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.citationStats span {
+  background: var(--paper);
+  border: 1px solid var(--cloud);
+  border-radius: 999px;
+  color: var(--note);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
+.citationCampaignForm,
+.directoryPicker,
+.citationTaskList {
+  display: grid;
+  gap: 12px;
+}
+
+.directoryPicker {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.directoryOption {
+  align-items: center;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  min-height: 70px;
+  padding: 12px;
+}
+
+.directoryOption.exists {
+  background: var(--paper);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.directoryOption strong,
+.directoryOption small {
+  display: block;
+}
+
+.directoryOption small {
+  color: var(--note);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.directoryOption em {
+  color: var(--teal-dark);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.citationTaskList {
+  border-top: 1px solid var(--cloud);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.citationTaskRow {
+  align-items: end;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(150px, 0.55fr) minmax(180px, 0.7fr) minmax(220px, 1fr) auto auto;
+  padding: 12px;
+}
+
+.citationTaskRow > div strong,
+.citationTaskRow > div span {
+  display: block;
+}
+
+.citationTaskRow > div span {
+  color: var(--note);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.citationTaskRow label {
+  color: var(--note);
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+}
+
+.citationTaskRow input,
+.citationTaskRow select {
+  background: white;
+  border: 1px solid var(--cloud);
+  border-radius: 8px;
+  color: var(--ink);
+  height: 38px;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.citationTaskRow .formNotice {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .connectionList {
   display: grid;
 }
@@ -1505,7 +1618,9 @@ th {
   .coreEditForm,
   .citationEditForm,
   .socialEditForm,
-  .imageUrlGrid {
+  .imageUrlGrid,
+  .directoryPicker,
+  .citationTaskRow {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -1554,7 +1669,9 @@ th {
   .coreEditForm,
   .citationEditForm,
   .socialEditForm,
-  .imageUrlGrid {
+  .imageUrlGrid,
+  .directoryPicker,
+  .citationTaskRow {
     display: grid;
     grid-template-columns: 1fr;
   }
